@@ -70,6 +70,13 @@ class FocusedViewFakeEmbedder:
         return ((1.0, 0.0),)
 
 
+class LowScoreFakeEmbedder:
+    def embed(self, texts: tuple[str, ...]) -> tuple[tuple[float, ...], ...]:
+        if len(texts) == 1:
+            return ((0.0, 1.0),)
+        return tuple((1.0, 0.0) for _ in texts)
+
+
 class StubSearch:
     def __init__(self, result=(), error: Exception | None = None) -> None:
         self.result = result
@@ -171,6 +178,32 @@ def test_focused_metadata_view_can_rescue_relevant_use_case() -> None:
         "makita-cordless-drill-set",
         "bosch-router-table",
     ]
+
+
+@pytest.mark.parametrize("query", ["Art & Craft", "show me art and craft supplies"])
+def test_literal_category_phrase_is_guaranteed_below_similarity_floor(
+    query: str,
+) -> None:
+    search = SemanticCatalogSearch(embedder=LowScoreFakeEmbedder())
+
+    matches = search.search(query)
+
+    assert [match.listing.category for match in matches] == ["Art & Craft"] * 3
+    assert all(match.score == 0.0 for match in matches)
+
+
+def test_literal_title_phrase_is_guaranteed_below_similarity_floor() -> None:
+    search = SemanticCatalogSearch(embedder=LowScoreFakeEmbedder())
+
+    matches = search.search("Cricut Maker 3")
+
+    assert [match.listing.id for match in matches] == ["cricut-maker-3"]
+
+
+def test_partial_cross_category_word_is_not_a_guaranteed_match() -> None:
+    search = SemanticCatalogSearch(embedder=LowScoreFakeEmbedder())
+
+    assert search.search("art tools") == ()
 
 
 def test_gateway_embedder_requires_server_side_key(monkeypatch: pytest.MonkeyPatch) -> None:

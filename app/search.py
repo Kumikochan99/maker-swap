@@ -1,4 +1,5 @@
 import os
+import re
 from dataclasses import dataclass
 from math import isfinite, sqrt
 from threading import Lock
@@ -27,6 +28,7 @@ EMBEDDING_MODEL = "openai/text-embedding-3-small"
 EMBEDDING_TIMEOUT_SECONDS = 20.0
 SEARCH_RESULT_LIMIT = 4
 MINIMUM_SIMILARITY = 0.35
+NON_ALPHANUMERIC = re.compile(r"[^a-z0-9]+")
 
 
 class SearchError(RuntimeError):
@@ -201,9 +203,15 @@ class SemanticCatalogSearch:
             for index, listing in enumerate(catalogue)
         )
         ranked = sorted(scored, key=lambda match: match.score, reverse=True)
-        return tuple(
-            match for match in ranked if match.score >= MINIMUM_SIMILARITY
-        )[:limit]
+        literal_ids = literal_match_ids(normalized_query, catalogue)
+        guaranteed = [match for match in ranked if match.listing.id in literal_ids]
+        semantic = [
+            match
+            for match in ranked
+            if match.score >= MINIMUM_SIMILARITY
+            and match.listing.id not in literal_ids
+        ]
+        return tuple((guaranteed + semantic)[:limit])
 
     def _get_catalog_vectors(
         self,
@@ -248,6 +256,36 @@ class SemanticCatalogSearch:
 
 def normalize_text(value: str) -> str:
     return " ".join(value.split()).casefold()
+
+
+def normalize_literal_text(value: str) -> str:
+    words = NON_ALPHANUMERIC.sub(" ", normalize_text(value).replace("&", " and "))
+    return " ".join(words.split())
+
+
+def contains_phrase(container: str, phrase: str) -> bool:
+    return bool(phrase) and f" {phrase} " in f" {container} "
+
+
+def literal_match_ids(
+    query: str,
+    listings: Sequence[Listing],
+) -> set[str]:
+    normalized_query = normalize_literal_text(query)
+    matches: set[str] = set()
+
+    for listing in listings:
+        category = normalize_literal_text(listing.category)
+        title = normalize_literal_text(listing.title)
+        category_match = contains_phrase(normalized_query, category)
+        title_match = contains_phrase(title, normalized_query) or contains_phrase(
+            normalized_query,
+            title,
+        )
+        if category_match or title_match:
+            matches.add(listing.id)
+
+    return matches
 
 
 def listing_search_text(listing: Listing) -> str:
