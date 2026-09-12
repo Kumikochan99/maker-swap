@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block title %}Maker Swap - Second-hand tools for makers{% endblock %}
+
+{% block content %}
+<main class="mx-auto flex min-h-screen max-w-6xl items-center px-5 py-16 sm:px-8">
+  <section class="w-full overflow-hidden rounded-[2rem] border border-stone-200 bg-white shadow-xl shadow-stone-200/60">
+    <div class="grid lg:grid-cols-[1.15fr_0.85fr]">
+      <div class="p-8 sm:p-12 lg:p-16">
+        <p class="mb-8 inline-flex rounded-full bg-orange-100 px-4 py-2 text-sm font-semibold text-orange-800">
+          {{ phase }} build is live
+        </p>
+        <h1 class="max-w-2xl font-display text-5xl font-bold leading-[0.98] tracking-tight sm:text-7xl">
+          Good tools deserve a second project.
+        </h1>
+        <p class="mt-7 max-w-xl text-lg leading-8 text-slate-600">
+          Maker Swap is becoming a friendly marketplace for pre-loved tools, components, instruments and creative supplies.
+        </p>
+        <div class="mt-10 flex flex-wrap gap-3 text-sm font-semibold">
+          <span class="rounded-full bg-slate-950 px-4 py-2 text-white">No sign-in</span>
+          <span class="rounded-full border border-stone-300 px-4 py-2">Built for phones</span>
+          <span class="rounded-full border border-stone-300 px-4 py-2">AI-assisted discovery</span>
+        </div>
+      </div>
+      <div class="relative min-h-72 bg-slate-950 p-8 text-white sm:p-12 lg:min-h-full">
+        <div class="absolute right-8 top-8 h-24 w-24 rounded-full bg-orange-500 blur-2xl"></div>
+        <div class="relative flex h-full flex-col justify-end">
+          <p class="font-display text-8xl font-bold text-orange-400">01</p>
+          <p class="mt-4 max-w-sm text-xl leading-8 text-slate-200">
+            The foundation is ready. The catalogue arrives in the next build phase.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+{% endblock %}
+

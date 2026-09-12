@@ -1,0 +1,2 @@
+"""Maker Swap application package."""
+
