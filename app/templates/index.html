@@ -107,7 +107,7 @@
     <div id="catalogue-empty-state" class="mt-9 rounded-3xl border border-dashed border-stone-300 bg-white px-6 py-16 text-center {% if listings %}hidden{% endif %}">
       <p data-empty-heading class="font-display text-2xl font-bold">No listings in that category yet.</p>
       <p data-empty-description class="mt-2 text-slate-600">Try the full catalogue instead.</p>
-      <a href="{{ url_for('home') }}#listings" class="mt-6 inline-flex rounded-full bg-slate-950 px-5 py-3 text-sm font-bold text-white">Browse all items</a>
+      <a id="browse-all-items" href="{{ url_for('home') }}#listings" class="mt-6 inline-flex rounded-full bg-slate-950 px-5 py-3 text-sm font-bold text-white">Browse all items</a>
     </div>
 
     <template id="listing-card-template">

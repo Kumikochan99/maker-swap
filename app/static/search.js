@@ -7,6 +7,7 @@
   const buttonLabel = submitButton.querySelector("[data-search-button-label]");
   const spinner = submitButton.querySelector("[data-search-spinner]");
   const clearButton = document.querySelector("#catalogue-search-clear");
+  const browseAllLink = document.querySelector("#browse-all-items");
   const status = document.querySelector("#search-status");
   const grid = document.querySelector("#listing-grid");
   const emptyState = document.querySelector("#catalogue-empty-state");
@@ -16,6 +17,8 @@
   const cardTemplate = document.querySelector("#listing-card-template");
   const money = new Intl.NumberFormat("en-SG", { maximumFractionDigits: 0 });
   let activeRequest = null;
+  let searchStateActive = false;
+  let resetInProgress = false;
 
   function setStatus(message, state = "idle") {
     status.textContent = message;
@@ -28,6 +31,20 @@
     grid.setAttribute("aria-busy", String(isLoading));
     spinner.classList.toggle("hidden", !isLoading);
     buttonLabel.textContent = isLoading ? "Searching..." : "Find matches";
+  }
+
+  function returnToFullCatalogue() {
+    if (resetInProgress) return;
+    resetInProgress = true;
+
+    if (activeRequest) {
+      activeRequest.abort();
+      activeRequest = null;
+    }
+    input.value = "";
+    setLoading(false);
+    window.history.replaceState(null, "", "/#listings");
+    window.location.reload();
   }
 
   function populateCard(listing) {
@@ -50,6 +67,7 @@
   }
 
   function renderResults(results, query) {
+    searchStateActive = true;
     heading.textContent = "AI search matches";
     clearButton.classList.remove("hidden");
 
@@ -85,6 +103,11 @@
   form.addEventListener("submit", async (event) => {
     event.preventDefault();
     const query = input.value.trim().replace(/\s+/g, " ");
+
+    if (query.length === 0) {
+      returnToFullCatalogue();
+      return;
+    }
 
     if (query.length < 2) {
       input.setCustomValidity("Enter at least 2 non-space characters.");
@@ -153,9 +176,22 @@
   input.addEventListener("input", () => {
     input.setCustomValidity("");
     input.removeAttribute("aria-invalid");
+
+    if (input.value.trim().length === 0) {
+      if (searchStateActive || activeRequest || window.location.search) {
+        returnToFullCatalogue();
+        return;
+      }
+      setStatus("");
+    }
   });
 
   clearButton.addEventListener("click", () => {
-    window.location.assign("/#listings");
+    returnToFullCatalogue();
+  });
+
+  browseAllLink.addEventListener("click", (event) => {
+    event.preventDefault();
+    returnToFullCatalogue();
   });
 })();
