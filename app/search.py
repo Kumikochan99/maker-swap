@@ -277,7 +277,7 @@ def literal_match_ids(
     for listing in listings:
         category = normalize_literal_text(listing.category)
         title = normalize_literal_text(listing.title)
-        category_match = contains_phrase(normalized_query, category)
+        category_match = contains_phrase(category, normalized_query)
         title_match = contains_phrase(title, normalized_query) or contains_phrase(
             normalized_query,
             title,

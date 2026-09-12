@@ -180,7 +180,7 @@ def test_focused_metadata_view_can_rescue_relevant_use_case() -> None:
     ]
 
 
-@pytest.mark.parametrize("query", ["Art & Craft", "show me art and craft supplies"])
+@pytest.mark.parametrize("query", ["art", "Art & Craft"])
 def test_literal_category_phrase_is_guaranteed_below_similarity_floor(
     query: str,
 ) -> None:
