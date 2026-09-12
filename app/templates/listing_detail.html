@@ -3,48 +3,54 @@
 {% block title %}{{ listing.title }} - Maker Swap{% endblock %}
 
 {% block content %}
-<main id="main-content" class="mx-auto max-w-7xl px-5 py-8 sm:px-8 sm:py-12">
-  <nav aria-label="Breadcrumb" class="mb-8 text-sm font-semibold text-slate-500">
-    <a href="{{ url_for('home') }}" class="transition hover:text-orange-700">Browse</a>
-    <span aria-hidden="true" class="mx-2">/</span>
-    <span class="text-slate-800">{{ listing.category }}</span>
-  </nav>
+<main id="main-content" class="detail-backdrop px-5 py-8 sm:px-8 sm:py-12" data-catalogue-backdrop data-catalogue-url="{{ url_for('home') }}#listings">
+  <div class="mx-auto max-w-7xl">
+    <nav aria-label="Breadcrumb" class="mb-8 text-sm font-semibold text-slate-500">
+      <a href="{{ url_for('home') }}#listings" class="transition hover:text-orange-700">Browse</a>
+      <span aria-hidden="true" class="mx-2">/</span>
+      <span class="text-slate-800">{{ listing.category }}</span>
+    </nav>
 
-  <article class="overflow-hidden rounded-[2rem] border border-stone-200 bg-white shadow-xl shadow-stone-200/50">
-    <div class="grid lg:grid-cols-2">
-      <div class="bg-stone-100">
-        <img src="{{ listing.image }}" alt="Illustration for {{ listing.title }}" class="h-full min-h-80 w-full object-cover lg:min-h-[38rem]">
-      </div>
-      <div class="flex flex-col p-7 sm:p-10 lg:p-14">
-        <div class="flex flex-wrap items-center gap-3 text-xs font-bold uppercase tracking-[0.14em]">
-          <span class="text-orange-700">{{ listing.category }}</span>
-          <span class="rounded-full bg-emerald-100 px-3 py-1.5 text-emerald-800">{{ listing.condition }}</span>
+    <article data-listing-card class="overflow-hidden rounded-[2rem] border border-stone-200 bg-white shadow-xl shadow-stone-200/50">
+      <div class="grid lg:grid-cols-2">
+        <div class="bg-stone-100">
+          <img src="{{ listing.image }}" alt="Illustration for {{ listing.title }}" class="h-full min-h-80 w-full object-cover lg:min-h-[38rem]">
         </div>
+        <div class="flex flex-col p-7 sm:p-10 lg:p-14">
+          <div class="flex flex-wrap items-center gap-3 text-xs font-bold uppercase tracking-[0.14em]">
+            <span class="text-orange-700">{{ listing.category }}</span>
+            <span class="rounded-full bg-emerald-100 px-3 py-1.5 text-emerald-800">{{ listing.condition }}</span>
+          </div>
 
-        <h1 class="mt-6 font-display text-4xl font-bold leading-tight tracking-[-0.035em] sm:text-5xl">{{ listing.title }}</h1>
-        <p class="mt-5 font-display text-4xl font-bold text-slate-950">S${{ "{:,}".format(listing.price) }}</p>
-        <p class="mt-7 text-lg leading-8 text-slate-600">{{ listing.description }}</p>
+          <h1 class="mt-6 font-display text-4xl font-bold leading-tight tracking-[-0.035em] sm:text-5xl">{{ listing.title }}</h1>
+          <p class="mt-5 font-display text-4xl font-bold text-slate-950">S${{ "{:,}".format(listing.price) }}</p>
+          <p class="mt-7 text-lg leading-8 text-slate-600">{{ listing.description }}</p>
 
-        <section class="mt-9" aria-labelledby="good-for-heading">
-          <h2 id="good-for-heading" class="text-sm font-bold uppercase tracking-[0.16em] text-slate-500">Good for</h2>
-          <ul class="mt-4 flex flex-wrap gap-2">
-            {% for tag in listing.tags %}
-              <li class="rounded-full border border-stone-300 bg-stone-50 px-3 py-2 text-sm font-semibold text-slate-700">{{ tag }}</li>
-            {% endfor %}
-          </ul>
-        </section>
+          <section class="mt-9" aria-labelledby="good-for-heading">
+            <h2 id="good-for-heading" class="text-sm font-bold uppercase tracking-[0.16em] text-slate-500">Good for</h2>
+            <ul class="mt-4 flex flex-wrap gap-2">
+              {% for tag in listing.tags %}
+                <li class="rounded-full border border-stone-300 bg-stone-50 px-3 py-2 text-sm font-semibold text-slate-700">{{ tag }}</li>
+              {% endfor %}
+            </ul>
+          </section>
 
-        <div class="mt-10 rounded-2xl bg-slate-950 p-5 text-white sm:p-6">
-          <p class="text-xs font-bold uppercase tracking-[0.16em] text-orange-400">Pickup area</p>
-          <p class="mt-2 font-display text-2xl font-bold">{{ listing.pickup_area }}</p>
-          <p class="mt-2 text-sm leading-6 text-slate-300">Location is approximate display data for this seeded demo. No seller profile or messaging is available.</p>
+          <div class="mt-10 rounded-2xl bg-slate-950 p-5 text-white sm:p-6">
+            <p class="text-xs font-bold uppercase tracking-[0.16em] text-orange-400">Pickup area</p>
+            <p class="mt-2 font-display text-2xl font-bold">{{ listing.pickup_area }}</p>
+            <p class="mt-2 text-sm leading-6 text-slate-300">Location is approximate display data for this seeded demo. No seller profile or messaging is available.</p>
+          </div>
+
+          <a href="{{ url_for('home') }}#listings" class="mt-8 inline-flex w-fit items-center gap-2 rounded-full border border-stone-300 px-5 py-3 text-sm font-bold transition hover:border-slate-950 hover:bg-slate-950 hover:text-white">
+            <span aria-hidden="true">←</span> Back to catalogue
+          </a>
         </div>
-
-        <a href="{{ url_for('home') }}#listings" class="mt-8 inline-flex w-fit items-center gap-2 rounded-full border border-stone-300 px-5 py-3 text-sm font-bold transition hover:border-slate-950 hover:bg-slate-950 hover:text-white">
-          <span aria-hidden="true">←</span> Back to catalogue
-        </a>
       </div>
-    </div>
-  </article>
+    </article>
+  </div>
 </main>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', path='/detail.js') }}" defer></script>
 {% endblock %}

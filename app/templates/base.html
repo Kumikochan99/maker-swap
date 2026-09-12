@@ -27,10 +27,14 @@
     </header>
     {% block content %}{% endblock %}
     <footer class="mt-20 border-t border-stone-200 bg-white">
-      <div class="mx-auto flex max-w-7xl flex-col gap-3 px-5 py-8 text-sm text-slate-500 sm:flex-row sm:items-center sm:justify-between sm:px-8">
-        <p>Maker Swap - useful gear, ready for another idea.</p>
-        <p>Seeded demo catalogue · Singapore pickup areas</p>
+      <div class="mx-auto flex max-w-7xl flex-col gap-5 px-5 py-8 text-sm text-slate-500 sm:flex-row sm:items-center sm:justify-between sm:px-8">
+        <p>Demo project · CognitioLabs assessment.</p>
+        <nav class="flex items-center gap-5 font-semibold" aria-label="Footer navigation">
+          <a href="{{ url_for('notes') }}" class="transition hover:text-orange-700">/notes</a>
+          <a href="https://github.com/Kumikochan99/maker-swap" target="_blank" rel="noopener noreferrer" class="transition hover:text-orange-700">GitHub <span class="sr-only">(opens in a new tab)</span></a>
+        </nav>
       </div>
     </footer>
+    {% block scripts %}{% endblock %}
   </body>
 </html>

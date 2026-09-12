@@ -35,6 +35,9 @@ def test_browse_page_renders_every_listing() -> None:
     assert "Bosch Router with Compact Table" in response.text
     assert '<meta name="viewport"' in response.text
     assert "sm:grid-cols-2" in response.text
+    assert 'href="http://testserver/notes"' in response.text
+    assert 'href="https://github.com/Kumikochan99/maker-swap"' in response.text
+    assert "Demo project · CognitioLabs assessment." in response.text
 
 
 def test_category_filter_limits_visible_listings() -> None:
@@ -72,6 +75,9 @@ def test_listing_detail_uses_plain_pickup_area_data() -> None:
     assert "Jurong East" in response.text
     assert "No seller profile or messaging is available." in response.text
     assert 'href="http://testserver/#listings"' in response.text
+    assert 'data-catalogue-url="http://testserver/#listings"' in response.text
+    assert "data-listing-card" in response.text
+    assert 'src="http://testserver/static/detail.js"' in response.text
 
 
 def test_unknown_listing_returns_friendly_404() -> None:

@@ -20,3 +20,11 @@ def test_health_check() -> None:
     assert response.status_code == 200
     assert response.json() == {"status": "ok"}
 
+
+def test_notes_page_is_real_and_truthful() -> None:
+    response = client.get("/notes")
+
+    assert response.status_code == 200
+    assert "What this demo is - and is not." in response.text
+    assert "The 16 listings" in response.text
+    assert "not yet available in this build" in response.text

@@ -7,4 +7,5 @@
 - [Phase 1] Treat listing location as plain pickup-area text only - avoids introducing seller identities or profile structure.
 - [Phase 2] Validate seeded JSON with a strict Pydantic listing schema at load time - malformed catalogue data should fail visibly.
 - [Phase 2] Use local reusable SVG category artwork instead of remote photos - keeps the deployed browse flow self-contained and reliable.
+- [Phase 2] Publish a minimal truthful `/notes` page before its full Phase 5 write-up - the footer must never point to a placeholder or missing page.
 - [Phase 1] Exclude the supplied assessment PDF from Git history - it is reference material, not public application source.

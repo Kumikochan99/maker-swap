@@ -67,6 +67,14 @@ def listing_detail(request: Request, listing_id: str) -> HTMLResponse:
     )
 
 
+@app.get("/notes", response_class=HTMLResponse)
+def notes(request: Request) -> HTMLResponse:
+    return templates.TemplateResponse(
+        request=request,
+        name="notes.html",
+    )
+
+
 @app.get("/health")
 def health() -> dict[str, str]:
     return {"status": "ok"}
