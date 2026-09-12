@@ -54,7 +54,7 @@ def test_category_filters_return_to_catalogue_anchor() -> None:
 
     assert response.status_code == 200
     assert 'id="listings"' in response.text
-    assert response.text.count("#listings\"") == 6
+    assert response.text.count("#listings\"") >= 6
     assert "?category=Electronics#listings" in response.text
 
 

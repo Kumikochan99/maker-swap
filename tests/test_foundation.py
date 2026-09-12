@@ -27,4 +27,5 @@ def test_notes_page_is_real_and_truthful() -> None:
     assert response.status_code == 200
     assert "What this demo is - and is not." in response.text
     assert "The 16 listings" in response.text
-    assert "not yet available in this build" in response.text
+    assert "text-embedding-3-small" in response.text
+    assert "catalogue Q&amp;A is not yet available" in response.text

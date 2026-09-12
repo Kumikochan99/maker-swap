@@ -1,11 +1,22 @@
 from pathlib import Path
+from typing import Annotated
 
-from fastapi import FastAPI, Query, Request
+from fastapi import Depends, FastAPI, HTTPException, Query, Request
 from fastapi.responses import HTMLResponse, Response
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
 from app.catalog import CatalogLoadError, get_categories, get_listing, load_listings
+from app.search import (
+    SearchGatewayError,
+    SearchKeyError,
+    SearchModelError,
+    SearchRequest,
+    SearchResponse,
+    SearchTimeoutError,
+    SemanticCatalogSearch,
+    get_search_service,
+)
 
 
 BASE_DIR = Path(__file__).resolve().parent
@@ -72,6 +83,52 @@ def notes(request: Request) -> HTMLResponse:
     return templates.TemplateResponse(
         request=request,
         name="notes.html",
+    )
+
+
+@app.post("/api/search", response_model=SearchResponse)
+def search_catalogue(
+    payload: SearchRequest,
+    search: Annotated[SemanticCatalogSearch, Depends(get_search_service)],
+) -> SearchResponse:
+    try:
+        matches = search.search(payload.query)
+    except SearchKeyError as exc:
+        raise HTTPException(
+            status_code=503,
+            detail={
+                "code": "search_not_configured",
+                "message": "AI search is not configured on the server.",
+            },
+        ) from exc
+    except SearchTimeoutError as exc:
+        raise HTTPException(
+            status_code=503,
+            detail={
+                "code": "search_timeout",
+                "message": "The AI search provider timed out. Please try again.",
+            },
+        ) from exc
+    except SearchModelError as exc:
+        raise HTTPException(
+            status_code=503,
+            detail={
+                "code": "search_model_unavailable",
+                "message": "The configured embedding model is unavailable through the AI provider.",
+            },
+        ) from exc
+    except SearchGatewayError as exc:
+        raise HTTPException(
+            status_code=503,
+            detail={
+                "code": "search_gateway_unavailable",
+                "message": "The AI search provider is unavailable. Please try again.",
+            },
+        ) from exc
+
+    return SearchResponse(
+        query=payload.query,
+        results=tuple(match.listing for match in matches),
     )
 
 

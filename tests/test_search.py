@@ -1,0 +1,247 @@
+from types import SimpleNamespace
+
+import httpx
+import pytest
+from fastapi.testclient import TestClient
+from openai import APIConnectionError, APITimeoutError, PermissionDeniedError
+
+from app.catalog import load_listings
+from app.main import app
+from app.search import (
+    GatewayEmbedder,
+    SearchGatewayError,
+    SearchKeyError,
+    SearchModelError,
+    SearchTimeoutError,
+    SemanticCatalogSearch,
+    get_search_service,
+    listing_search_text,
+)
+
+
+client = TestClient(app)
+
+
+class MeaningAwareFakeEmbedder:
+    def __init__(self) -> None:
+        self.calls: list[tuple[str, ...]] = []
+
+    def embed(self, texts: tuple[str, ...]) -> tuple[tuple[float, ...], ...]:
+        self.calls.append(tuple(texts))
+        return tuple(self._vector(text) for text in texts)
+
+    @staticmethod
+    def _vector(text: str) -> tuple[float, ...]:
+        if any(term in text for term in ("electronics", "circuit", "repair")):
+            return (1.0, 0.0, 0.0)
+        if any(term in text for term in ("instrument", "music", "piano")):
+            return (0.0, 1.0, 0.0)
+        return (0.0, 0.0, 1.0)
+
+
+class StubSearch:
+    def __init__(self, result=(), error: Exception | None = None) -> None:
+        self.result = result
+        self.error = error
+        self.queries: list[str] = []
+
+    def search(self, query: str):
+        self.queries.append(query)
+        if self.error is not None:
+            raise self.error
+        return self.result
+
+
+def override_search(stub: StubSearch) -> None:
+    app.dependency_overrides[get_search_service] = lambda: stub
+
+
+@pytest.fixture(autouse=True)
+def clear_dependency_overrides():
+    yield
+    app.dependency_overrides.clear()
+
+
+def test_listing_embedding_text_contains_every_searchable_field() -> None:
+    listing = load_listings()[0]
+    text = listing_search_text(listing)
+
+    assert listing.title.casefold() in text
+    assert listing.category.casefold() in text
+    assert listing.condition.casefold() in text
+    assert listing.description.casefold() in text
+    assert listing.pickup_area.casefold() in text
+    assert all(tag.casefold() in text for tag in listing.tags)
+
+
+def test_semantic_search_ranks_exact_catalogue_records() -> None:
+    listings = load_listings()
+    embedder = MeaningAwareFakeEmbedder()
+    search = SemanticCatalogSearch(embedder=embedder)
+
+    matches = search.search("repair a circuit board", listings=listings, limit=4)
+
+    assert [match.listing.id for match in matches] == [
+        "hakko-fx888d-station",
+        "arduino-sensor-starter-kit",
+        "rigol-ds1054z-oscilloscope",
+        "raspberry-pi-4-workbench",
+    ]
+    assert matches[0].listing is listings[4]
+
+
+def test_catalogue_embeddings_are_cached_between_queries() -> None:
+    embedder = MeaningAwareFakeEmbedder()
+    search = SemanticCatalogSearch(embedder=embedder)
+
+    search.search("electronics repair")
+    search.search("music practice")
+
+    assert len(embedder.calls) == 3
+    assert len(embedder.calls[0]) == 16
+    assert len(embedder.calls[1]) == 1
+    assert len(embedder.calls[2]) == 1
+
+
+def test_gateway_embedder_requires_server_side_key(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.delenv("CLASSGW_KEY", raising=False)
+
+    with pytest.raises(SearchKeyError):
+        GatewayEmbedder().embed(("maker tools",))
+
+
+@pytest.mark.parametrize(
+    ("provider_error", "expected_error"),
+    [
+        (
+            APITimeoutError(request=httpx.Request("POST", "https://gateway.test")),
+            SearchTimeoutError,
+        ),
+        (
+            APIConnectionError(request=httpx.Request("POST", "https://gateway.test")),
+            SearchGatewayError,
+        ),
+    ],
+)
+def test_gateway_embedder_maps_provider_failures(provider_error, expected_error) -> None:
+    embeddings = SimpleNamespace(create=lambda **kwargs: (_ for _ in ()).throw(provider_error))
+    gateway = GatewayEmbedder(client=SimpleNamespace(embeddings=embeddings))
+
+    with pytest.raises(expected_error):
+        gateway.embed(("maker tools",))
+
+
+def test_gateway_embedder_maps_model_access_failure() -> None:
+    request = httpx.Request("POST", "https://gateway.test")
+    response = httpx.Response(403, request=request)
+    provider_error = PermissionDeniedError(
+        "Embedding model unavailable",
+        response=response,
+        body={"error": "model unavailable"},
+    )
+    embeddings = SimpleNamespace(create=lambda **kwargs: (_ for _ in ()).throw(provider_error))
+    gateway = GatewayEmbedder(client=SimpleNamespace(embeddings=embeddings))
+
+    with pytest.raises(SearchModelError):
+        gateway.embed(("maker tools",))
+
+
+def test_gateway_embedder_rejects_malformed_vectors() -> None:
+    response = SimpleNamespace(
+        data=[SimpleNamespace(index=0, embedding=[])],
+    )
+    embeddings = SimpleNamespace(create=lambda **kwargs: response)
+    gateway = GatewayEmbedder(client=SimpleNamespace(embeddings=embeddings))
+
+    with pytest.raises(SearchModelError):
+        gateway.embed(("maker tools",))
+
+
+def test_gateway_embedder_uses_provider_qualified_model_id() -> None:
+    request: dict = {}
+
+    def create_embedding(**kwargs):
+        request.update(kwargs)
+        return SimpleNamespace(
+            data=[SimpleNamespace(index=0, embedding=[1.0, 0.0])]
+        )
+
+    gateway = GatewayEmbedder(
+        client=SimpleNamespace(embeddings=SimpleNamespace(create=create_embedding))
+    )
+
+    gateway.embed(("maker tools",))
+
+    assert request == {
+        "model": "openai/text-embedding-3-small",
+        "input": ["maker tools"],
+    }
+
+
+def test_search_api_returns_unchanged_listing_objects() -> None:
+    listings = load_listings()
+    matches = (
+        SimpleNamespace(listing=listings[4], score=0.98),
+        SimpleNamespace(listing=listings[6], score=0.91),
+    )
+    stub = StubSearch(result=matches)
+    override_search(stub)
+
+    response = client.post("/api/search", json={"query": "  Electronics   repair  "})
+
+    assert response.status_code == 200
+    assert response.json() == {
+        "query": "Electronics repair",
+        "results": [
+            listings[4].model_dump(mode="json"),
+            listings[6].model_dump(mode="json"),
+        ],
+    }
+    assert stub.queries == ["Electronics repair"]
+
+
+@pytest.mark.parametrize(
+    "body",
+    [
+        {"query": " "},
+        {"query": "a"},
+        {"query": "x" * 201},
+        {"query": "valid query", "unexpected": True},
+        {},
+    ],
+)
+def test_search_api_validates_input(body: dict) -> None:
+    override_search(StubSearch())
+
+    response = client.post("/api/search", json=body)
+
+    assert response.status_code == 422
+
+
+@pytest.mark.parametrize(
+    ("error", "code"),
+    [
+        (SearchKeyError("missing"), "search_not_configured"),
+        (SearchTimeoutError("slow"), "search_timeout"),
+        (SearchModelError("model"), "search_model_unavailable"),
+        (SearchGatewayError("offline"), "search_gateway_unavailable"),
+    ],
+)
+def test_search_api_surfaces_honest_failure_codes(error: Exception, code: str) -> None:
+    override_search(StubSearch(error=error))
+
+    response = client.post("/api/search", json={"query": "maker tools"})
+
+    assert response.status_code == 503
+    assert response.json()["detail"]["code"] == code
+
+
+def test_browse_page_includes_async_search_states() -> None:
+    response = client.get("/")
+
+    assert response.status_code == 200
+    assert 'id="catalogue-search-form"' in response.text
+    assert 'id="search-status"' in response.text
+    assert 'id="catalogue-empty-state"' in response.text
+    assert 'src="http://testserver/static/search.js"' in response.text
+    assert "CLASSGW_KEY" not in response.text

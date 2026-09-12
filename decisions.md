@@ -8,4 +8,7 @@
 - [Phase 2] Validate seeded JSON with a strict Pydantic listing schema at load time - malformed catalogue data should fail visibly.
 - [Phase 2] Use local reusable SVG category artwork instead of remote photos - keeps the deployed browse flow self-contained and reliable.
 - [Phase 2] Publish a minimal truthful `/notes` page before its full Phase 5 write-up - the footer must never point to a placeholder or missing page.
+- [Phase 3] Batch and cache one embedding per seeded listing, then cosine-rank exact catalogue records for each embedded query - repeat searches need one model call and cannot invent products.
+- [Phase 3] Request `openai/text-embedding-3-small` because this gateway rejects the unqualified ID as unpriced; its successful response confirms the underlying `text-embedding-3-small` model.
+- [Phase 3] Return the four strongest cosine matches with no arbitrary similarity cutoff - one focused desktop row avoids weak tail results, while relative ranking stays stable across query types.
 - [Phase 1] Exclude the supplied assessment PDF from Git history - it is reference material, not public application source.

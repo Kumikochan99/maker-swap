@@ -22,10 +22,49 @@
   </section>
 
   <section id="listings" class="mx-auto max-w-7xl scroll-mt-4 px-5 pt-10 sm:px-8 sm:pt-14" aria-labelledby="catalogue-heading">
-    <div class="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+    <div class="search-panel overflow-hidden rounded-[2rem] border border-slate-800 bg-slate-950 text-white shadow-xl shadow-slate-200/60">
+      <div class="grid gap-7 p-6 sm:p-8 lg:grid-cols-[0.72fr_1.28fr] lg:items-end lg:p-10">
+        <div>
+          <p class="text-xs font-bold uppercase tracking-[0.18em] text-orange-400">AI catalogue search</p>
+          <h2 class="mt-3 font-display text-3xl font-bold tracking-tight sm:text-4xl">Describe what you need.</h2>
+          <p id="search-help" class="mt-3 max-w-md text-sm leading-6 text-slate-300">Search all 16 seeded listings by project, use case or features - not just exact keywords.</p>
+        </div>
+
+        <div>
+          <form id="catalogue-search-form" role="search" novalidate>
+            <label for="catalogue-search-query" class="sr-only">Search the catalogue in natural language</label>
+            <div class="flex flex-col gap-3 sm:flex-row">
+              <input
+                id="catalogue-search-query"
+                name="query"
+                type="search"
+                minlength="2"
+                maxlength="200"
+                autocomplete="off"
+                enterkeyhint="search"
+                aria-describedby="search-help search-status"
+                placeholder="e.g. I need a beginner-friendly tool for electronics repair"
+                class="min-w-0 flex-1 rounded-2xl border border-slate-600 bg-slate-900 px-5 py-4 text-base text-white placeholder:text-slate-400 focus:border-orange-400"
+              >
+              <button id="catalogue-search-submit" type="submit" class="inline-flex min-h-14 items-center justify-center gap-2 rounded-2xl bg-orange-500 px-6 py-4 font-bold text-slate-950 transition hover:bg-orange-400 disabled:cursor-wait disabled:opacity-70">
+                <span data-search-spinner class="hidden h-4 w-4 animate-spin rounded-full border-2 border-slate-950 border-r-transparent" aria-hidden="true"></span>
+                <span data-search-button-label>Find matches</span>
+              </button>
+            </div>
+          </form>
+          <div class="mt-3 flex min-h-7 flex-wrap items-start justify-between gap-3">
+            <p id="search-status" class="search-status text-sm leading-6 text-slate-300" role="status" aria-live="polite"></p>
+            <button id="catalogue-search-clear" type="button" class="hidden text-sm font-bold text-orange-300 underline decoration-orange-300/50 underline-offset-4 transition hover:text-orange-200">Clear search</button>
+          </div>
+          <noscript><p class="mt-3 text-sm text-amber-200">Natural-language search needs JavaScript. The full catalogue remains available below.</p></noscript>
+        </div>
+      </div>
+    </div>
+
+    <div class="mt-12 flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
       <div>
         <p class="text-sm font-bold uppercase tracking-[0.18em] text-slate-500">The workbench</p>
-        <h2 id="catalogue-heading" class="mt-2 font-display text-3xl font-bold tracking-tight sm:text-4xl">
+        <h2 id="catalogue-heading" class="mt-2 font-display text-3xl font-bold tracking-tight sm:text-4xl" tabindex="-1">
           {% if selected_category %}{{ selected_category }}{% else %}Browse everything{% endif %}
         </h2>
       </div>
@@ -39,8 +78,8 @@
       </nav>
     </div>
 
-    {% if listings %}
-      <div class="mt-9 grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+    <div id="listing-grid" class="mt-9 grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 {% if not listings %}hidden{% endif %}" aria-live="off">
+      {% if listings %}
         {% for listing in listings %}
           <article data-listing-id="{{ listing.id }}" class="listing-card group overflow-hidden rounded-3xl border border-stone-200 bg-white">
             <a href="{{ url_for('listing_detail', listing_id=listing.id) }}" class="block h-full" aria-label="View {{ listing.title }} for S${{ listing.price }}">
@@ -62,14 +101,40 @@
             </a>
           </article>
         {% endfor %}
-      </div>
-    {% else %}
-      <div class="mt-9 rounded-3xl border border-dashed border-stone-300 bg-white px-6 py-16 text-center">
-        <p class="font-display text-2xl font-bold">No listings in that category yet.</p>
-        <p class="mt-2 text-slate-600">Try the full catalogue instead.</p>
-        <a href="{{ url_for('home') }}#listings" class="mt-6 inline-flex rounded-full bg-slate-950 px-5 py-3 text-sm font-bold text-white">Browse all items</a>
-      </div>
-    {% endif %}
+      {% endif %}
+    </div>
+
+    <div id="catalogue-empty-state" class="mt-9 rounded-3xl border border-dashed border-stone-300 bg-white px-6 py-16 text-center {% if listings %}hidden{% endif %}">
+      <p data-empty-heading class="font-display text-2xl font-bold">No listings in that category yet.</p>
+      <p data-empty-description class="mt-2 text-slate-600">Try the full catalogue instead.</p>
+      <a href="{{ url_for('home') }}#listings" class="mt-6 inline-flex rounded-full bg-slate-950 px-5 py-3 text-sm font-bold text-white">Browse all items</a>
+    </div>
+
+    <template id="listing-card-template">
+      <article data-listing-id class="listing-card group overflow-hidden rounded-3xl border border-stone-200 bg-white">
+        <a data-card-link href="#" class="block h-full">
+          <div class="aspect-[4/3] overflow-hidden bg-stone-100">
+            <img data-card-image src="" alt="" class="h-full w-full object-cover transition duration-500 group-hover:scale-[1.04]" loading="lazy">
+          </div>
+          <div class="flex min-h-64 flex-col p-5">
+            <div class="flex items-center justify-between gap-3 text-xs font-bold uppercase tracking-[0.12em]">
+              <span data-card-category class="text-orange-700"></span>
+              <span data-card-condition class="rounded-full bg-stone-100 px-2.5 py-1 text-slate-600"></span>
+            </div>
+            <h3 data-card-title class="mt-4 font-display text-xl font-bold leading-tight tracking-tight text-slate-950"></h3>
+            <p data-card-description class="description-clamp mt-3 text-sm leading-6 text-slate-600"></p>
+            <div class="mt-auto flex items-end justify-between gap-4 pt-5">
+              <p data-card-price class="font-display text-2xl font-bold text-slate-950"></p>
+              <p class="text-right text-xs font-semibold text-slate-500">Pickup<br><span data-card-pickup></span></p>
+            </div>
+          </div>
+        </a>
+      </article>
+    </template>
   </section>
 </main>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', path='/search.js') }}" defer></script>
 {% endblock %}

@@ -86,6 +86,20 @@ body {
   -webkit-line-clamp: 3;
 }
 
+.search-panel {
+  background-image:
+    radial-gradient(circle at 92% 10%, rgb(249 115 22 / 22%), transparent 18rem),
+    linear-gradient(135deg, rgb(30 41 59 / 45%), transparent 55%);
+}
+
+.search-status[data-state="error"] {
+  color: #fde68a;
+}
+
+.search-status[data-state="success"] {
+  color: #bbf7d0;
+}
+
 .detail-backdrop {
   cursor: pointer;
 }
