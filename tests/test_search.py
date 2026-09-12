@@ -39,6 +39,23 @@ class MeaningAwareFakeEmbedder:
         return (0.0, 0.0, 1.0)
 
 
+class ThresholdFakeEmbedder:
+    def embed(self, texts: tuple[str, ...]) -> tuple[tuple[float, ...], ...]:
+        if len(texts) > 1:
+            return tuple(
+                (1.0, 0.0) if "hakko fx-888d" in text else (-1.0, 0.0)
+                for text in texts
+            )
+
+        query_vectors = {
+            "kayak": (0.20, 0.98),
+            "washing machine": (0.31, 0.95),
+            "kids going back to school": (0.216, 0.976),
+            "soldering iron": (0.80, 0.60),
+        }
+        return (query_vectors[texts[0]],)
+
+
 class StubSearch:
     def __init__(self, result=(), error: Exception | None = None) -> None:
         self.result = result
@@ -101,6 +118,25 @@ def test_catalogue_embeddings_are_cached_between_queries() -> None:
     assert len(embedder.calls[0]) == 16
     assert len(embedder.calls[1]) == 1
     assert len(embedder.calls[2]) == 1
+
+
+@pytest.mark.parametrize(
+    "query",
+    ["kayak", "washing machine", "kids going back to school"],
+)
+def test_similarity_threshold_returns_no_forced_matches(query: str) -> None:
+    search = SemanticCatalogSearch(embedder=ThresholdFakeEmbedder())
+
+    assert search.search(query) == ()
+
+
+def test_similarity_threshold_keeps_a_strong_match_and_removes_weak_tail() -> None:
+    search = SemanticCatalogSearch(embedder=ThresholdFakeEmbedder())
+
+    matches = search.search("soldering iron")
+
+    assert [match.listing.id for match in matches] == ["hakko-fx888d-station"]
+    assert matches[0].score == pytest.approx(0.8)
 
 
 def test_gateway_embedder_requires_server_side_key(monkeypatch: pytest.MonkeyPatch) -> None:

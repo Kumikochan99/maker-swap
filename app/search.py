@@ -26,6 +26,7 @@ GATEWAY_BASE_URL = "https://174.138.16.223/openrouter/v1"
 EMBEDDING_MODEL = "openai/text-embedding-3-small"
 EMBEDDING_TIMEOUT_SECONDS = 20.0
 SEARCH_RESULT_LIMIT = 4
+MINIMUM_SIMILARITY = 0.35
 
 
 class SearchError(RuntimeError):
@@ -192,9 +193,10 @@ class SemanticCatalogSearch:
             )
             for listing, vector in zip(catalogue, catalogue_vectors, strict=True)
         )
+        ranked = sorted(scored, key=lambda match: match.score, reverse=True)
         return tuple(
-            sorted(scored, key=lambda match: match.score, reverse=True)[:limit]
-        )
+            match for match in ranked if match.score >= MINIMUM_SIMILARITY
+        )[:limit]
 
     def _get_catalog_vectors(
         self,

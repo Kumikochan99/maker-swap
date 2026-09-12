@@ -11,4 +11,5 @@
 - [Phase 3] Batch and cache one embedding per seeded listing, then cosine-rank exact catalogue records for each embedded query - repeat searches need one model call and cannot invent products.
 - [Phase 3] Request `openai/text-embedding-3-small` because this gateway rejects the unqualified ID as unpriced; its successful response confirms the underlying `text-embedding-3-small` model.
 - [Phase 3] Return the four strongest cosine matches with no arbitrary similarity cutoff - one focused desktop row avoids weak tail results, while relative ranking stays stable across query types.
+- [Phase 3] Supersede the no-cutoff approach with a 0.35 cosine floor - real unrelated probes peaked at 0.31, while indirect valid matches began at 0.36, so empty results are more honest than weak forced matches.
 - [Phase 1] Exclude the supplied assessment PDF from Git history - it is reference material, not public application source.
