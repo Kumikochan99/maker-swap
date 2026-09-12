@@ -20,5 +20,6 @@
 - [Phase 3] Leave budget-language handling approximate - embeddings do not reliably weight constraints such as "cheap" or "budget-friendly" against numeric prices; explicit price parsing or filtering was deferred to protect time for the still-unbuilt Phase 4 Q&A.
 - [Phase 4] Keep Q&A stateless on the server and persist a bounded transcript in `sessionStorage` - conversation survives full-page navigation within one tab without accounts, a database, or indefinite browser storage.
 - [Phase 4] Give gpt-4o-mini only the top four Phase 3 retrieval matches as structured catalogue context - prompt size stays predictable and every factual answer remains tied to exact seeded listings.
-- [Phase 4] Surface retrieval or chat-provider failures as explicit widget errors with no canned answer - preserves the assessment's real-AI requirement when either model call fails.
+- [Phase 4] Supersede top-four embedding retrieval for Q&A with all 16 validated listings in every prompt - broad catalogue questions otherwise fell below the similarity floor, while this catalogue is small enough for complete context.
+- [Phase 4] Surface AI-provider failures as explicit widget errors with no canned answer - preserves the assessment's real-AI requirement when a model call fails.
 - [Phase 1] Exclude the supplied assessment PDF from Git history - it is reference material, not public application source.

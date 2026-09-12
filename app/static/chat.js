@@ -56,7 +56,7 @@
               source.id.length > 0 &&
               source.title.length > 0,
           )
-          .slice(0, 4)
+          .slice(0, 16)
           .map((source) => ({
             id: source.id.slice(0, 100),
             title: source.title.slice(0, 160),
@@ -122,13 +122,21 @@
       sources.className = "catalogue-chat-sources";
       sources.setAttribute("aria-label", "Catalogue context used for this answer");
 
-      message.sources.forEach((source) => {
-        const link = document.createElement("a");
-        link.className = "catalogue-chat-source";
-        link.href = `/listings/${encodeURIComponent(source.id)}`;
-        link.textContent = source.title;
-        sources.appendChild(link);
-      });
+      if (message.sources.length === 16) {
+        const summaryLink = document.createElement("a");
+        summaryLink.className = "catalogue-chat-source";
+        summaryLink.href = "/#listings";
+        summaryLink.textContent = "All 16 catalogue listings checked";
+        sources.appendChild(summaryLink);
+      } else {
+        message.sources.forEach((source) => {
+          const link = document.createElement("a");
+          link.className = "catalogue-chat-source";
+          link.href = `/listings/${encodeURIComponent(source.id)}`;
+          link.textContent = source.title;
+          sources.appendChild(link);
+        });
+      }
 
       article.appendChild(sources);
     }
@@ -248,7 +256,7 @@
     const controller = new AbortController();
     activeRequest = controller;
     setLoading(true);
-    setStatus("Retrieving relevant listings and asking gpt-4o-mini...", "loading");
+    setStatus("Reading all 16 listings and asking gpt-4o-mini...", "loading");
 
     try {
       const response = await fetch("/api/qa", {
@@ -287,9 +295,9 @@
       });
       const sourceCount = payload.sources.length;
       setStatus(
-        sourceCount === 0
-          ? "Answered after checking the catalogue; no relevant listings were retrieved."
-          : `Answered from ${sourceCount} retrieved catalogue ${sourceCount === 1 ? "listing" : "listings"}.`,
+        sourceCount === 16
+          ? "Answered using all 16 catalogue listings."
+          : `Answered using ${sourceCount} catalogue ${sourceCount === 1 ? "listing" : "listings"}.`,
         "success",
       );
     } catch (error) {

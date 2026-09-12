@@ -150,7 +150,7 @@ def ask_catalogue(
 ) -> QAResponse:
     try:
         result = qa.answer(payload.question, payload.history)
-    except (SearchKeyError, QAKeyError) as exc:
+    except QAKeyError as exc:
         raise HTTPException(
             status_code=503,
             detail={
@@ -158,7 +158,7 @@ def ask_catalogue(
                 "message": "Catalogue Q&A is not configured on this server.",
             },
         ) from exc
-    except (SearchTimeoutError, QATimeoutError) as exc:
+    except QATimeoutError as exc:
         raise HTTPException(
             status_code=503,
             detail={
@@ -166,7 +166,7 @@ def ask_catalogue(
                 "message": "The catalogue Q&A provider timed out. Please try again.",
             },
         ) from exc
-    except (SearchModelError, QAModelError) as exc:
+    except QAModelError as exc:
         raise HTTPException(
             status_code=503,
             detail={
@@ -174,7 +174,7 @@ def ask_catalogue(
                 "message": "A required Q&A model is unavailable through the AI provider.",
             },
         ) from exc
-    except (SearchGatewayError, QAGatewayError) as exc:
+    except QAGatewayError as exc:
         raise HTTPException(
             status_code=503,
             detail={

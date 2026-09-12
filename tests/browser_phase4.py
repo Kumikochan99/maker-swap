@@ -63,22 +63,29 @@ def test_real_conversation_and_persistence(page: Page) -> dict[str, str]:
     expect(toggle).to_have_attribute("aria-expanded", "true")
     assert_inside_viewport(page, panel)
 
+    broad = ask(page, "what products are in here", 1)
+    assert "don't know" not in broad.lower()
+    assert len(broad.strip()) >= 40
+    expect(
+        page.locator(".catalogue-chat-source", has_text="All 16 catalogue listings checked").last
+    ).to_be_visible()
+
     factual = ask(
         page,
         "What is the price and pickup area for the Hakko FX-888D Soldering Station?",
-        1,
+        2,
     )
     assert "S$115" in factual
     assert "Toa Payoh" in factual
+    expect(
+        page.locator(".catalogue-chat-source", has_text="All 16 catalogue listings checked").last
+    ).to_be_visible()
 
     page.locator("#catalogue-chat-close").click()
     expect(panel).to_be_hidden()
     expect(toggle).to_have_attribute("aria-expanded", "false")
 
-    toggle.click()
-    hakko_source = page.locator(".catalogue-chat-source", has_text="Hakko FX-888D").first
-    expect(hakko_source).to_be_visible()
-    hakko_source.click()
+    page.locator('[data-listing-id="hakko-fx888d-station"] a').click()
     expect(page).to_have_url(re.compile(r"/listings/hakko-fx888d-station$"))
 
     panel = page.locator("#catalogue-chat-panel")
@@ -86,18 +93,18 @@ def test_real_conversation_and_persistence(page: Page) -> dict[str, str]:
     expect(panel).to_be_hidden()
     expect(toggle).to_have_attribute("aria-expanded", "false")
     toggle.click()
-    expect(page.locator(".catalogue-chat-message")).to_have_count(2)
-    expect(page.locator('.catalogue-chat-message[data-role="user"]')).to_contain_text(
+    expect(page.locator(".catalogue-chat-message")).to_have_count(4)
+    expect(page.locator('.catalogue-chat-message[data-role="user"]').nth(1)).to_contain_text(
         "Hakko FX-888D"
     )
-    expect(page.locator('.catalogue-chat-message[data-role="assistant"]')).to_contain_text(
-        "S$115"
-    )
+    expect(
+        page.locator('.catalogue-chat-message[data-role="assistant"]').nth(1)
+    ).to_contain_text("S$115")
 
     comparison = ask(
         page,
         "Compare the Original Prusa MINI+ and Bambu Lab A1 mini, including price and condition.",
-        2,
+        3,
     )
     assert "Prusa" in comparison
     assert "Bambu" in comparison
@@ -107,12 +114,17 @@ def test_real_conversation_and_persistence(page: Page) -> dict[str, str]:
     unknown = ask(
         page,
         "What warranty does the Cricut Maker 3 Cutting Machine include?",
-        3,
+        4,
     )
     assert "don't know based on the Maker Swap catalogue" in unknown
 
     page.screenshot(path=ARTIFACT_DIR / "desktop-conversation.png", full_page=False)
-    return {"factual": factual, "comparison": comparison, "unknown": unknown}
+    return {
+        "broad": broad,
+        "factual": factual,
+        "comparison": comparison,
+        "unknown": unknown,
+    }
 
 
 def test_mobile_layout_and_footer(page: Page) -> dict[str, object]:
@@ -134,7 +146,7 @@ def test_mobile_layout_and_footer(page: Page) -> dict[str, object]:
     assert page.locator("body").evaluate(
         "element => getComputedStyle(element).overflow"
     ) == "hidden"
-    expect(page.locator(".catalogue-chat-message")).to_have_count(6)
+    expect(page.locator(".catalogue-chat-message")).to_have_count(8)
     page.screenshot(path=ARTIFACT_DIR / "mobile-open.png", full_page=False)
 
     page.locator("#catalogue-chat-close").click()
