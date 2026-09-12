@@ -46,6 +46,15 @@ def test_category_filter_limits_visible_listings() -> None:
     assert "Yamaha Pacifica 112V Guitar" not in response.text
 
 
+def test_category_filters_return_to_catalogue_anchor() -> None:
+    response = client.get("/")
+
+    assert response.status_code == 200
+    assert 'id="listings"' in response.text
+    assert response.text.count("#listings\"") == 6
+    assert "?category=Electronics#listings" in response.text
+
+
 def test_unknown_category_has_a_useful_empty_state() -> None:
     response = client.get("/", params={"category": "Imaginary Gear"})
 
@@ -74,4 +83,3 @@ def test_unknown_listing_returns_friendly_404() -> None:
 
 def test_lookup_returns_none_for_unknown_id() -> None:
     assert get_listing("not-a-real-listing") is None
-
