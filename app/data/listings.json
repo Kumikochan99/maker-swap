@@ -162,7 +162,7 @@
     "description": "Reliable 18 V drill-driver with two batteries, charger and hard case. Both batteries hold charge well for weekend projects.",
     "image": "/static/images/workshop-tools.svg",
     "pickup_area": "Bukit Panjang",
-    "tags": ["18 V", "two batteries", "woodworking", "portable"]
+    "tags": ["18 V", "two batteries", "woodworking", "portable", "renovation", "DIY", "home improvement"]
   },
   {
     "id": "bosch-router-table",
@@ -173,6 +173,6 @@
     "description": "Variable-speed palm router mounted in a compact benchtop table. Fully working with cosmetic wear, fence, collets and four common bits.",
     "image": "/static/images/workshop-tools.svg",
     "pickup_area": "Yishun",
-    "tags": ["woodworking", "variable speed", "router bits", "benchtop"]
+    "tags": ["woodworking", "variable speed", "router bits", "benchtop", "renovation", "DIY", "home improvement"]
   }
 ]

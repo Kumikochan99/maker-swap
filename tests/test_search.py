@@ -15,6 +15,7 @@ from app.search import (
     SearchTimeoutError,
     SemanticCatalogSearch,
     get_search_service,
+    listing_discovery_text,
     listing_search_text,
 )
 
@@ -56,6 +57,19 @@ class ThresholdFakeEmbedder:
         return (query_vectors[texts[0]],)
 
 
+class FocusedViewFakeEmbedder:
+    def embed(self, texts: tuple[str, ...]) -> tuple[tuple[float, ...], ...]:
+        if len(texts) > 1:
+            midpoint = len(texts) // 2
+            detailed = tuple((0.30, 0.954) for _ in texts[:midpoint])
+            focused = tuple(
+                (1.0, 0.0) if "renovation" in text else (-1.0, 0.0)
+                for text in texts[midpoint:]
+            )
+            return detailed + focused
+        return ((1.0, 0.0),)
+
+
 class StubSearch:
     def __init__(self, result=(), error: Exception | None = None) -> None:
         self.result = result
@@ -91,6 +105,15 @@ def test_listing_embedding_text_contains_every_searchable_field() -> None:
     assert all(tag.casefold() in text for tag in listing.tags)
 
 
+def test_discovery_embedding_focuses_on_title_category_and_tags() -> None:
+    listing = load_listings()[-1]
+    text = listing_discovery_text(listing)
+
+    assert listing.title.casefold() in text
+    assert listing.category.casefold() in text
+    assert all(tag.casefold() in text for tag in listing.tags)
+
+
 def test_semantic_search_ranks_exact_catalogue_records() -> None:
     listings = load_listings()
     embedder = MeaningAwareFakeEmbedder()
@@ -115,7 +138,7 @@ def test_catalogue_embeddings_are_cached_between_queries() -> None:
     search.search("music practice")
 
     assert len(embedder.calls) == 3
-    assert len(embedder.calls[0]) == 16
+    assert len(embedder.calls[0]) == 32
     assert len(embedder.calls[1]) == 1
     assert len(embedder.calls[2]) == 1
 
@@ -137,6 +160,17 @@ def test_similarity_threshold_keeps_a_strong_match_and_removes_weak_tail() -> No
 
     assert [match.listing.id for match in matches] == ["hakko-fx888d-station"]
     assert matches[0].score == pytest.approx(0.8)
+
+
+def test_focused_metadata_view_can_rescue_relevant_use_case() -> None:
+    search = SemanticCatalogSearch(embedder=FocusedViewFakeEmbedder())
+
+    matches = search.search("used for renovation")
+
+    assert [match.listing.id for match in matches] == [
+        "makita-cordless-drill-set",
+        "bosch-router-table",
+    ]
 
 
 def test_gateway_embedder_requires_server_side_key(monkeypatch: pytest.MonkeyPatch) -> None:

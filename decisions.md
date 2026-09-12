@@ -12,4 +12,6 @@
 - [Phase 3] Request `openai/text-embedding-3-small` because this gateway rejects the unqualified ID as unpriced; its successful response confirms the underlying `text-embedding-3-small` model.
 - [Phase 3] Return the four strongest cosine matches with no arbitrary similarity cutoff - one focused desktop row avoids weak tail results, while relative ranking stays stable across query types.
 - [Phase 3] Supersede the no-cutoff approach with a 0.35 cosine floor - real unrelated probes peaked at 0.31, while indirect valid matches began at 0.36, so empty results are more honest than weak forced matches.
+- [Phase 3] Add truthful renovation, DIY and home-improvement tags to both workshop tools instead of lowering the global floor - improves vague relevant intent without reviving unrelated matches.
+- [Phase 3] Supersede one catalogue vector with two cached views per listing (full details plus concise title/category/tags) - max-view scoring preserves detailed searches while giving specific use cases enough semantic weight.
 - [Phase 1] Exclude the supplied assessment PDF from Git history - it is reference material, not public application source.

@@ -157,7 +157,7 @@ class SemanticCatalogSearch:
         self._embedder = embedder or GatewayEmbedder()
         self._cache_lock = Lock()
         self._catalog_cache: tuple[
-            tuple[tuple[str, str], ...],
+            tuple[tuple[str, str, str], ...],
             tuple[tuple[float, ...], ...],
         ] | None = None
 
@@ -186,12 +186,19 @@ class SemanticCatalogSearch:
         if len(query_vector) != len(catalogue_vectors[0]):
             raise SearchModelError("Catalogue and query embeddings have different dimensions.")
 
+        focused_vector_offset = len(catalogue)
         scored = tuple(
             SearchMatch(
                 listing=listing,
-                score=cosine_similarity(query_vector, vector),
+                score=max(
+                    cosine_similarity(query_vector, catalogue_vectors[index]),
+                    cosine_similarity(
+                        query_vector,
+                        catalogue_vectors[focused_vector_offset + index],
+                    ),
+                ),
             )
-            for listing, vector in zip(catalogue, catalogue_vectors, strict=True)
+            for index, listing in enumerate(catalogue)
         )
         ranked = sorted(scored, key=lambda match: match.score, reverse=True)
         return tuple(
@@ -203,7 +210,12 @@ class SemanticCatalogSearch:
         listings: tuple[Listing, ...],
     ) -> tuple[tuple[float, ...], ...]:
         signature = tuple(
-            (listing.id, listing_search_text(listing)) for listing in listings
+            (
+                listing.id,
+                listing_search_text(listing),
+                listing_discovery_text(listing),
+            )
+            for listing in listings
         )
         cache = self._catalog_cache
         if cache is not None and cache[0] == signature:
@@ -214,8 +226,10 @@ class SemanticCatalogSearch:
             if cache is not None and cache[0] == signature:
                 return cache[1]
 
-            vectors = self._embedder.embed(tuple(text for _, text in signature))
-            if len(vectors) != len(listings):
+            detailed_texts = tuple(detail for _, detail, _ in signature)
+            focused_texts = tuple(focused for _, _, focused in signature)
+            vectors = self._embedder.embed(detailed_texts + focused_texts)
+            if len(vectors) != len(listings) * 2:
                 raise SearchModelError(
                     "The embedding model returned an unexpected catalogue vector count."
                 )
@@ -246,6 +260,13 @@ def listing_search_text(listing: Listing) -> str:
         f"tags: {', '.join(listing.tags)}",
     )
     return normalize_text("\n".join(fields))
+
+
+def listing_discovery_text(listing: Listing) -> str:
+    return normalize_text(
+        f"{listing.title}. category: {listing.category}. "
+        f"useful for: {', '.join(listing.tags)}."
+    )
 
 
 def cosine_similarity(
