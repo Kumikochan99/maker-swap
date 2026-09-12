@@ -66,9 +66,8 @@ def test_real_conversation_and_persistence(page: Page) -> dict[str, str]:
     broad = ask(page, "what products are in here", 1)
     assert "don't know" not in broad.lower()
     assert len(broad.strip()) >= 40
-    expect(
-        page.locator(".catalogue-chat-source", has_text="All 16 catalogue listings checked").last
-    ).to_be_visible()
+    broad_message = page.locator('.catalogue-chat-message[data-role="assistant"]').nth(0)
+    expect(broad_message.locator(".catalogue-chat-source")).to_have_count(0)
 
     factual = ask(
         page,
@@ -77,9 +76,11 @@ def test_real_conversation_and_persistence(page: Page) -> dict[str, str]:
     )
     assert "S$115" in factual
     assert "Toa Payoh" in factual
-    expect(
-        page.locator(".catalogue-chat-source", has_text="All 16 catalogue listings checked").last
-    ).to_be_visible()
+    factual_message = page.locator('.catalogue-chat-message[data-role="assistant"]').nth(1)
+    expect(factual_message.locator(".catalogue-chat-source")).to_have_count(1)
+    expect(factual_message.locator(".catalogue-chat-source")).to_have_attribute(
+        "href", "/listings/hakko-fx888d-station"
+    )
 
     page.locator("#catalogue-chat-close").click()
     expect(panel).to_be_hidden()
@@ -103,13 +104,20 @@ def test_real_conversation_and_persistence(page: Page) -> dict[str, str]:
 
     comparison = ask(
         page,
-        "Compare the Original Prusa MINI+ and Bambu Lab A1 mini, including price and condition.",
+        "Compare the Yamaha Pacifica 112V Guitar and Roland FP-10 Digital Piano, including price and condition.",
         3,
     )
-    assert "Prusa" in comparison
-    assert "Bambu" in comparison
+    assert "Yamaha" in comparison
+    assert "Roland" in comparison
+    assert "S$280" in comparison
     assert "S$420" in comparison
-    assert "S$380" in comparison
+    comparison_message = page.locator('.catalogue-chat-message[data-role="assistant"]').nth(2)
+    comparison_links = comparison_message.locator(".catalogue-chat-source")
+    expect(comparison_links).to_have_count(2)
+    assert set(comparison_links.evaluate_all("links => links.map(link => link.getAttribute('href'))")) == {
+        "/listings/yamaha-pacifica-112v",
+        "/listings/roland-fp-10-keyboard",
+    }
 
     unknown = ask(
         page,
@@ -117,6 +125,8 @@ def test_real_conversation_and_persistence(page: Page) -> dict[str, str]:
         4,
     )
     assert "don't know based on the Maker Swap catalogue" in unknown
+    unknown_message = page.locator('.catalogue-chat-message[data-role="assistant"]').nth(3)
+    expect(unknown_message.locator(".catalogue-chat-source")).to_have_count(0)
 
     page.screenshot(path=ARTIFACT_DIR / "desktop-conversation.png", full_page=False)
     return {

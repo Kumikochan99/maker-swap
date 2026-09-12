@@ -21,5 +21,6 @@
 - [Phase 4] Keep Q&A stateless on the server and persist a bounded transcript in `sessionStorage` - conversation survives full-page navigation within one tab without accounts, a database, or indefinite browser storage.
 - [Phase 4] Give gpt-4o-mini only the top four Phase 3 retrieval matches as structured catalogue context - prompt size stays predictable and every factual answer remains tied to exact seeded listings.
 - [Phase 4] Supersede top-four embedding retrieval for Q&A with all 16 validated listings in every prompt - broad catalogue questions otherwise fell below the similarity floor, while this catalogue is small enough for complete context.
+- [Phase 4] Separate full prompt context from answer links - gpt-4o-mini returns up to four directly referenced listing IDs, which the server validates; broad and unknown answers intentionally show no listing links.
 - [Phase 4] Surface AI-provider failures as explicit widget errors with no canned answer - preserves the assessment's real-AI requirement when a model call fails.
 - [Phase 1] Exclude the supplied assessment PDF from Git history - it is reference material, not public application source.
