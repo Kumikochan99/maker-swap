@@ -15,6 +15,7 @@
 - [Phase 3] Add truthful renovation, DIY and home-improvement tags to both workshop tools instead of lowering the global floor - improves vague relevant intent without reviving unrelated matches.
 - [Phase 3] Supersede one catalogue vector with two cached views per listing (full details plus concise title/category/tags) - max-view scoring preserves detailed searches while giving specific use cases enough semantic weight.
 - [Phase 3] Version the search JavaScript URL - prevents browser or Render caches from retaining obsolete interaction logic after a deploy.
-- [Phase 3] Promote full normalized category and title phrase matches ahead of thresholded semantic matches - short literal queries stay reliable without weakening the 0.35 relevance floor.
-- [Phase 3] Defer field-weighted or query-parsed disambiguation for time - multi-word queries can still surface tangential items when a term crosses categories, such as "tools" in "art tools".
+- [Phase 3] Promote normalized query phrases found in category names and literal title phrase matches ahead of thresholded semantic matches - short literal queries stay reliable without weakening the 0.35 relevance floor.
+- [Phase 3] Leave the known "art tools" precision issue unresolved - it returns three relevant Art & Craft listings plus one Workshop Tools listing because "tools" creates semantic overlap; field-weighted or query-parsed disambiguation was deferred to protect time for the still-unbuilt Phase 4 Q&A.
+- [Phase 3] Leave budget-language handling approximate - embeddings do not reliably weight constraints such as "cheap" or "budget-friendly" against numeric prices; explicit price parsing or filtering was deferred to protect time for the still-unbuilt Phase 4 Q&A.
 - [Phase 1] Exclude the supplied assessment PDF from Git history - it is reference material, not public application source.
