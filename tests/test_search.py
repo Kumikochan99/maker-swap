@@ -314,5 +314,5 @@ def test_browse_page_includes_async_search_states() -> None:
     assert 'id="search-status"' in response.text
     assert 'id="catalogue-empty-state"' in response.text
     assert 'id="browse-all-items"' in response.text
-    assert 'src="http://testserver/static/search.js"' in response.text
+    assert 'src="http://testserver/static/search.js?v=phase3-reset-1"' in response.text
     assert "CLASSGW_KEY" not in response.text

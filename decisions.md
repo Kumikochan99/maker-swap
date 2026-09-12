@@ -14,4 +14,5 @@
 - [Phase 3] Supersede the no-cutoff approach with a 0.35 cosine floor - real unrelated probes peaked at 0.31, while indirect valid matches began at 0.36, so empty results are more honest than weak forced matches.
 - [Phase 3] Add truthful renovation, DIY and home-improvement tags to both workshop tools instead of lowering the global floor - improves vague relevant intent without reviving unrelated matches.
 - [Phase 3] Supersede one catalogue vector with two cached views per listing (full details plus concise title/category/tags) - max-view scoring preserves detailed searches while giving specific use cases enough semantic weight.
+- [Phase 3] Version the search JavaScript URL - prevents browser or Render caches from retaining obsolete interaction logic after a deploy.
 - [Phase 1] Exclude the supplied assessment PDF from Git history - it is reference material, not public application source.
