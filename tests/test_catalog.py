@@ -71,6 +71,7 @@ def test_listing_detail_uses_plain_pickup_area_data() -> None:
     assert "S$420" in response.text
     assert "Jurong East" in response.text
     assert "No seller profile or messaging is available." in response.text
+    assert 'href="http://testserver/#listings"' in response.text
 
 
 def test_unknown_listing_returns_friendly_404() -> None:
