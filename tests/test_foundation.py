@@ -28,4 +28,4 @@ def test_notes_page_is_real_and_truthful() -> None:
     assert "What this demo is - and is not." in response.text
     assert "The 16 listings" in response.text
     assert "text-embedding-3-small" in response.text
-    assert "catalogue Q&amp;A is not yet available" in response.text
+    assert "grounded catalogue Q&amp;A uses gpt-4o-mini" in response.text

@@ -7,6 +7,17 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
 from app.catalog import CatalogLoadError, get_categories, get_listing, load_listings
+from app.qa import (
+    CatalogueQA,
+    QAGatewayError,
+    QAKeyError,
+    QAModelError,
+    QARequest,
+    QAResponse,
+    QASource,
+    QATimeoutError,
+    get_qa_service,
+)
 from app.search import (
     SearchGatewayError,
     SearchKeyError,
@@ -129,6 +140,56 @@ def search_catalogue(
     return SearchResponse(
         query=payload.query,
         results=tuple(match.listing for match in matches),
+    )
+
+
+@app.post("/api/qa", response_model=QAResponse)
+def ask_catalogue(
+    payload: QARequest,
+    qa: Annotated[CatalogueQA, Depends(get_qa_service)],
+) -> QAResponse:
+    try:
+        result = qa.answer(payload.question, payload.history)
+    except (SearchKeyError, QAKeyError) as exc:
+        raise HTTPException(
+            status_code=503,
+            detail={
+                "code": "qa_not_configured",
+                "message": "Catalogue Q&A is not configured on this server.",
+            },
+        ) from exc
+    except (SearchTimeoutError, QATimeoutError) as exc:
+        raise HTTPException(
+            status_code=503,
+            detail={
+                "code": "qa_timeout",
+                "message": "The catalogue Q&A provider timed out. Please try again.",
+            },
+        ) from exc
+    except (SearchModelError, QAModelError) as exc:
+        raise HTTPException(
+            status_code=503,
+            detail={
+                "code": "qa_model_unavailable",
+                "message": "A required Q&A model is unavailable through the AI provider.",
+            },
+        ) from exc
+    except (SearchGatewayError, QAGatewayError) as exc:
+        raise HTTPException(
+            status_code=503,
+            detail={
+                "code": "qa_gateway_unavailable",
+                "message": "The catalogue Q&A provider is unavailable. Please try again.",
+            },
+        ) from exc
+
+    return QAResponse(
+        question=payload.question,
+        answer=result.answer,
+        sources=tuple(
+            QASource(id=listing.id, title=listing.title)
+            for listing in result.sources
+        ),
     )
 
 
