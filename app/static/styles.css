@@ -4,6 +4,9 @@
 
 body {
   font-family: "DM Sans", sans-serif;
+  background:
+    radial-gradient(circle at 90% 0%, rgb(255 237 213 / 55%), transparent 27rem),
+    #fafaf9;
 }
 
 .font-display {
@@ -15,3 +18,79 @@ body {
   outline-offset: 3px;
 }
 
+.skip-link {
+  position: fixed;
+  left: 1rem;
+  top: 1rem;
+  z-index: 100;
+  transform: translateY(-200%);
+  border-radius: 9999px;
+  background: #0f172a;
+  color: white;
+  padding: 0.75rem 1rem;
+  font-weight: 700;
+}
+
+.skip-link:focus {
+  transform: translateY(0);
+}
+
+.hero-grid {
+  background-color: #f5f5f4;
+  background-image:
+    linear-gradient(rgb(15 23 42 / 5%) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(15 23 42 / 5%) 1px, transparent 1px);
+  background-size: 32px 32px;
+}
+
+.category-pill {
+  flex: none;
+  border: 1px solid #d6d3d1;
+  border-radius: 9999px;
+  background: white;
+  color: #475569;
+  padding: 0.65rem 1rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  white-space: nowrap;
+  transition: 160ms ease;
+}
+
+.category-pill:hover {
+  border-color: #f97316;
+  color: #c2410c;
+}
+
+.category-pill-active,
+.category-pill-active:hover {
+  border-color: #0f172a;
+  background: #0f172a;
+  color: white;
+}
+
+.listing-card {
+  box-shadow: 0 8px 28px rgb(15 23 42 / 5%);
+  transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease;
+}
+
+.listing-card:hover {
+  transform: translateY(-4px);
+  border-color: #fb923c;
+  box-shadow: 0 18px 40px rgb(15 23 42 / 12%);
+}
+
+.description-clamp {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
+}

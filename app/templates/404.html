@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block title %}Listing not found - Maker Swap{% endblock %}
+
+{% block content %}
+<main id="main-content" class="mx-auto grid min-h-[65vh] max-w-3xl place-items-center px-5 py-16 text-center sm:px-8">
+  <section>
+    <p class="font-display text-8xl font-bold text-orange-500">404</p>
+    <h1 class="mt-5 font-display text-4xl font-bold tracking-tight">That item has left the workbench.</h1>
+    <p class="mx-auto mt-4 max-w-lg text-lg leading-8 text-slate-600">The listing may not exist, or its link may be out of date. The rest of the catalogue is ready to explore.</p>
+    <a href="{{ url_for('home') }}" class="mt-8 inline-flex rounded-full bg-slate-950 px-6 py-3 text-sm font-bold text-white transition hover:bg-orange-600">Browse available items</a>
+  </section>
+</main>
+{% endblock %}
+

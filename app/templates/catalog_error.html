@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+
+{% block title %}Catalogue unavailable - Maker Swap{% endblock %}
+
+{% block content %}
+<main id="main-content" class="mx-auto grid min-h-[65vh] max-w-3xl place-items-center px-5 py-16 text-center sm:px-8">
+  <section>
+    <p class="text-sm font-bold uppercase tracking-[0.2em] text-orange-700">Catalogue unavailable</p>
+    <h1 class="mt-5 font-display text-4xl font-bold tracking-tight">The workshop shelves could not be loaded.</h1>
+    <p class="mx-auto mt-4 max-w-lg text-lg leading-8 text-slate-600">{{ message }} Please try again later.</p>
+    <a href="{{ url_for('home') }}" class="mt-8 inline-flex rounded-full bg-slate-950 px-6 py-3 text-sm font-bold text-white">Try again</a>
+  </section>
+</main>
+{% endblock %}

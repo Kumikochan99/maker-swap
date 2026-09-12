@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" role="img" aria-labelledby="title">
+  <title id="title">Stylised string instrument</title>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#fdf4ff"/><stop offset="1" stop-color="#e9d5ff"/></linearGradient>
+    <filter id="shadow"><feDropShadow dx="0" dy="18" stdDeviation="18" flood-color="#3b0764" flood-opacity=".2"/></filter>
+  </defs>
+  <rect width="800" height="600" fill="url(#bg)"/>
+  <path d="M95 145c90-70 165-73 225-9" fill="none" stroke="#c084fc" stroke-width="16" stroke-linecap="round" opacity=".45"/>
+  <g filter="url(#shadow)" transform="rotate(-34 400 300)">
+    <path d="M273 344c-44-62-30-139 25-169 46-24 75 6 102 4 27 2 56-28 102-4 55 30 69 107 25 169-33 47-79 50-127 50s-94-3-127-50z" fill="#ea580c"/>
+    <circle cx="400" cy="277" r="45" fill="#7c2d12"/>
+    <rect x="382" y="75" width="36" height="204" rx="15" fill="#78350f"/>
+    <path d="M364 72h72l-10-60h-52z" fill="#0f172a"/>
+    <path d="M391 31v319m18-319v319" stroke="#fde68a" stroke-width="4"/>
+    <rect x="352" y="337" width="96" height="17" rx="8" fill="#0f172a"/>
+  </g>
+  <circle cx="670" cy="450" r="55" fill="#7e22ce" opacity=".16"/>
+</svg>
+

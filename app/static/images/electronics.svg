@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" role="img" aria-labelledby="title">
+  <title id="title">Stylised electronics workbench circuit board</title>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="1" x2="1" y2="0"><stop stop-color="#ecfdf5"/><stop offset="1" stop-color="#a7f3d0"/></linearGradient>
+    <filter id="shadow"><feDropShadow dx="0" dy="18" stdDeviation="18" flood-color="#064e3b" flood-opacity=".2"/></filter>
+  </defs>
+  <rect width="800" height="600" fill="url(#bg)"/>
+  <circle cx="115" cy="110" r="68" fill="#10b981" opacity=".22"/>
+  <g filter="url(#shadow)">
+    <rect x="174" y="118" width="452" height="364" rx="42" fill="#047857"/>
+    <path d="M235 203h120v66h110v-67h98M235 390h95v-70h152v72h80" fill="none" stroke="#6ee7b7" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="235" cy="203" r="17" fill="#fef3c7"/><circle cx="563" cy="202" r="17" fill="#fef3c7"/>
+    <circle cx="235" cy="390" r="17" fill="#fef3c7"/><circle cx="562" cy="392" r="17" fill="#fef3c7"/>
+    <rect x="330" y="248" width="152" height="105" rx="20" fill="#0f172a"/>
+    <path d="M350 228v-26m38 26v-26m38 26v-26m38 26v-26M350 379v-26m38 26v-26m38 26v-26m38 26v-26" stroke="#f59e0b" stroke-width="9" stroke-linecap="round"/>
+  </g>
+</svg>
+

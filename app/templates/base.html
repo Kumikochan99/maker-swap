@@ -5,14 +5,32 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description" content="Maker Swap - quality second-hand tools and supplies for creative people.">
     <title>{% block title %}Maker Swap{% endblock %}</title>
+    <link rel="icon" href="{{ url_for('static', path='/favicon.svg') }}" type="image/svg+xml">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="{{ url_for('static', path='/styles.css') }}">
   </head>
-  <body class="min-h-screen bg-stone-50 text-slate-950 antialiased">
+  <body class="min-h-screen overflow-x-hidden bg-stone-50 text-slate-950 antialiased">
+    <a class="skip-link" href="#main-content">Skip to content</a>
+    <header class="border-b border-stone-200 bg-stone-50/95 backdrop-blur">
+      <div class="mx-auto flex max-w-7xl items-center justify-between px-5 py-4 sm:px-8">
+        <a href="{{ url_for('home') }}" class="group inline-flex items-center gap-3" aria-label="Maker Swap home">
+          <span class="grid h-10 w-10 place-items-center rounded-xl bg-slate-950 text-lg font-bold text-orange-400 transition group-hover:-rotate-3">M</span>
+          <span class="font-display text-xl font-bold tracking-tight">Maker Swap</span>
+        </a>
+        <nav aria-label="Primary navigation">
+          <a href="{{ url_for('home') }}" class="rounded-full px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-white hover:text-slate-950">Browse</a>
+        </nav>
+      </div>
+    </header>
     {% block content %}{% endblock %}
+    <footer class="mt-20 border-t border-stone-200 bg-white">
+      <div class="mx-auto flex max-w-7xl flex-col gap-3 px-5 py-8 text-sm text-slate-500 sm:flex-row sm:items-center sm:justify-between sm:px-8">
+        <p>Maker Swap - useful gear, ready for another idea.</p>
+        <p>Seeded demo catalogue · Singapore pickup areas</p>
+      </div>
+    </footer>
   </body>
 </html>
-
