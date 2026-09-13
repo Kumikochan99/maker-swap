@@ -180,15 +180,29 @@ def test_focused_metadata_view_can_rescue_relevant_use_case() -> None:
     ]
 
 
-@pytest.mark.parametrize("query", ["art", "Art & Craft"])
+@pytest.mark.parametrize(
+    ("query", "expected_category", "expected_count"),
+    [
+        ("art", "Art & Craft", 3),
+        ("Art & Craft", "Art & Craft", 3),
+        ("3d", "3D Printing", 4),
+        ("electronics", "Electronics", 4),
+        ("instruments", "Instruments", 3),
+        ("workshop", "Workshop Tools", 2),
+    ],
+)
 def test_literal_category_phrase_is_guaranteed_below_similarity_floor(
     query: str,
+    expected_category: str,
+    expected_count: int,
 ) -> None:
     search = SemanticCatalogSearch(embedder=LowScoreFakeEmbedder())
 
     matches = search.search(query)
 
-    assert [match.listing.category for match in matches] == ["Art & Craft"] * 3
+    assert [match.listing.category for match in matches] == [
+        expected_category
+    ] * expected_count
     assert all(match.score == 0.0 for match in matches)
 
 

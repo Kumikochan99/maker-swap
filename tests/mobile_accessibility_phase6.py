@@ -1,0 +1,280 @@
+"""Live mobile-layout and basic accessibility checks for Phase 6."""
+
+import json
+import os
+import re
+import tempfile
+from pathlib import Path
+
+from playwright.sync_api import Browser, Page, expect, sync_playwright
+
+
+BASE_URL = os.environ.get(
+    "MAKER_SWAP_TEST_URL",
+    "https://maker-swap.onrender.com",
+).rstrip("/")
+EDGE_PATH = Path(r"C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe")
+ARTIFACT_DIR = Path(tempfile.gettempdir()) / "maker-swap-phase6-mobile"
+VIEWPORTS = (
+    {"width": 390, "height": 844},
+    {"width": 430, "height": 932},
+)
+
+
+def boxes_overlap(left: dict[str, float], right: dict[str, float]) -> bool:
+    return not (
+        left["x"] + left["width"] <= right["x"]
+        or right["x"] + right["width"] <= left["x"]
+        or left["y"] + left["height"] <= right["y"]
+        or right["y"] + right["height"] <= left["y"]
+    )
+
+
+def assert_no_horizontal_page_overflow(page: Page) -> None:
+    dimensions = page.evaluate(
+        """() => ({
+            viewport: window.innerWidth,
+            document: document.documentElement.scrollWidth,
+            body: document.body.scrollWidth,
+        })"""
+    )
+    assert dimensions["document"] <= dimensions["viewport"] + 1
+    assert dimensions["body"] <= dimensions["viewport"] + 1
+
+
+def assert_inside_viewport(page: Page, selector: str) -> dict[str, float]:
+    box = page.locator(selector).bounding_box()
+    assert box is not None
+    viewport = page.viewport_size
+    assert viewport is not None
+    assert box["x"] >= 0
+    assert box["y"] >= 0
+    assert box["x"] + box["width"] <= viewport["width"] + 1
+    assert box["y"] + box["height"] <= viewport["height"] + 1
+    return box
+
+
+def parse_rgb(color: str) -> tuple[float, float, float]:
+    channels = re.findall(r"[\d.]+", color)
+    if len(channels) < 3:
+        raise AssertionError(f"Could not parse browser color {color!r}")
+    return tuple(float(channel) / 255 for channel in channels[:3])
+
+
+def relative_luminance(color: str) -> float:
+    def linearize(channel: float) -> float:
+        return channel / 12.92 if channel <= 0.04045 else ((channel + 0.055) / 1.055) ** 2.4
+
+    red, green, blue = (linearize(channel) for channel in parse_rgb(color))
+    return 0.2126 * red + 0.7152 * green + 0.0722 * blue
+
+
+def contrast_ratio(foreground: str, background: str) -> float:
+    light, dark = sorted(
+        (relative_luminance(foreground), relative_luminance(background)),
+        reverse=True,
+    )
+    return (light + 0.05) / (dark + 0.05)
+
+
+def measured_contrast(
+    page: Page,
+    foreground_selector: str,
+    background_selector: str | None = None,
+) -> float:
+    foreground = page.locator(foreground_selector).first.evaluate(
+        "element => getComputedStyle(element).color"
+    )
+    background = page.locator(background_selector or foreground_selector).first.evaluate(
+        "element => getComputedStyle(element).backgroundColor"
+    )
+    return contrast_ratio(foreground, background)
+
+
+def focused_element_state(page: Page) -> dict[str, object]:
+    return page.evaluate(
+        """() => {
+            const element = document.activeElement;
+            const style = getComputedStyle(element);
+            const box = element.getBoundingClientRect();
+            return {
+                id: element.id,
+                className: String(element.className),
+                tagName: element.tagName,
+                outlineStyle: style.outlineStyle,
+                outlineWidth: parseFloat(style.outlineWidth),
+                box: { x: box.x, y: box.y, width: box.width, height: box.height },
+            };
+        }"""
+    )
+
+
+def verify_keyboard_and_labels(page: Page) -> dict[str, object]:
+    search_input = page.get_by_label("Search the catalogue in natural language")
+    expect(search_input).to_have_attribute("id", "catalogue-search-query")
+    expect(page.get_by_role("button", name="Find matches")).to_be_visible()
+    assert page.locator("img:not([alt])").count() == 0
+    assert page.locator("button").evaluate_all(
+        """buttons => buttons.every(button =>
+            Boolean(button.getAttribute('aria-label') || button.textContent.trim())
+        )"""
+    )
+
+    page.keyboard.press("Tab")
+    skip_focus = focused_element_state(page)
+    assert "skip-link" in skip_focus["className"]
+    assert skip_focus["outlineStyle"] != "none"
+    assert skip_focus["outlineWidth"] >= 3
+    assert skip_focus["box"]["y"] >= 0
+
+    page.keyboard.press("Tab")
+    page.keyboard.press("Tab")
+    page.keyboard.press("Tab")
+    input_focus = focused_element_state(page)
+    assert input_focus["id"] == "catalogue-search-query"
+    assert input_focus["outlineStyle"] != "none"
+    assert input_focus["outlineWidth"] >= 3
+
+    toggle_focus = None
+    for _ in range(40):
+        page.keyboard.press("Tab")
+        candidate = focused_element_state(page)
+        if candidate["id"] == "catalogue-chat-toggle":
+            toggle_focus = candidate
+            break
+
+    assert toggle_focus is not None
+    assert toggle_focus["id"] == "catalogue-chat-toggle"
+    assert toggle_focus["outlineStyle"] != "none"
+    assert toggle_focus["outlineWidth"] >= 3
+
+    page.keyboard.press("Enter")
+    expect(page.locator("#catalogue-chat-panel")).to_be_visible()
+    expect(page.get_by_label("Ask a question about the catalogue")).to_be_focused()
+    page.keyboard.press("Escape")
+    expect(page.locator("#catalogue-chat-panel")).to_be_hidden()
+    expect(page.locator("#catalogue-chat-toggle")).to_be_focused()
+
+    return {
+        "skip_link": skip_focus,
+        "search_input": input_focus,
+        "chat_toggle": toggle_focus,
+        "chat_keyboard_open_and_escape": True,
+    }
+
+
+def verify_viewport(
+    browser: Browser,
+    viewport: dict[str, int],
+) -> dict[str, object]:
+    context = browser.new_context(viewport=viewport)
+    page = context.new_page()
+    response = page.goto(f"{BASE_URL}/", wait_until="networkidle")
+    assert response is not None and response.ok
+    assert_no_horizontal_page_overflow(page)
+    expect(page.locator("#catalogue-search-query")).to_be_visible()
+    expect(page.locator("#catalogue-search-submit")).to_be_visible()
+    expect(page.locator("#listing-grid > [data-listing-id]")).to_have_count(16)
+    first_card_box = page.locator("#listing-grid > [data-listing-id]").first.bounding_box()
+    assert first_card_box is not None and first_card_box["width"] <= viewport["width"]
+
+    keyboard = verify_keyboard_and_labels(page)
+    contrast = {
+        "hero_heading": measured_contrast(page, ".hero-grid h1", ".hero-grid"),
+        "search_input": measured_contrast(page, "#catalogue-search-query"),
+        "search_button": measured_contrast(page, "#catalogue-search-submit"),
+        "category_link": measured_contrast(
+            page,
+            ".category-pill:not(.category-pill-active)",
+        ),
+        "footer_copy": measured_contrast(page, ".site-footer p", ".site-footer"),
+        "chat_toggle": measured_contrast(page, "#catalogue-chat-toggle"),
+    }
+    assert all(ratio >= 4.5 for ratio in contrast.values())
+
+    page.locator(".site-footer").scroll_into_view_if_needed()
+    page.evaluate("window.scrollTo(0, document.body.scrollHeight)")
+    toggle_box = assert_inside_viewport(page, "#catalogue-chat-toggle")
+    footer_targets = page.locator(".site-footer p, .site-footer a")
+    for index in range(footer_targets.count()):
+        target_box = footer_targets.nth(index).bounding_box()
+        if target_box is not None:
+            assert not boxes_overlap(toggle_box, target_box)
+
+    page.goto(f"{BASE_URL}/notes", wait_until="networkidle")
+    assert_no_horizontal_page_overflow(page)
+    expect(page.locator("main section[id]")).to_have_count(5)
+    page.screenshot(
+        path=ARTIFACT_DIR / f"notes-{viewport['width']}.png",
+        full_page=False,
+    )
+
+    page.goto(
+        f"{BASE_URL}/listings/original-prusa-mini-plus",
+        wait_until="networkidle",
+    )
+    assert_no_horizontal_page_overflow(page)
+    expect(page.get_by_role("heading", name="Original Prusa MINI+")).to_be_visible()
+    page.screenshot(
+        path=ARTIFACT_DIR / f"detail-{viewport['width']}.png",
+        full_page=False,
+    )
+
+    page.locator("#catalogue-chat-toggle").click()
+    panel_box = assert_inside_viewport(page, "#catalogue-chat-panel")
+    expect(page.get_by_label("Ask a question about the catalogue")).to_be_visible()
+    expect(page.get_by_role("button", name="Ask the catalogue")).to_be_visible()
+    expect(page.get_by_role("button", name="Close catalogue chat").first).to_be_visible()
+    page.screenshot(
+        path=ARTIFACT_DIR / f"chat-{viewport['width']}.png",
+        full_page=False,
+    )
+
+    result = {
+        "viewport": viewport,
+        "horizontal_overflow": False,
+        "first_card_width": first_card_box["width"],
+        "chat_panel": panel_box,
+        "footer_targets_checked": footer_targets.count(),
+        "labels": {
+            "search": True,
+            "chat": True,
+            "buttons_named": True,
+            "images_have_alt": True,
+        },
+        "keyboard": keyboard,
+        "contrast_ratios": {
+            name: round(ratio, 2) for name, ratio in contrast.items()
+        },
+    }
+    context.close()
+    return result
+
+
+def main() -> None:
+    if not EDGE_PATH.is_file():
+        raise SystemExit(f"Microsoft Edge was not found at {EDGE_PATH}")
+    ARTIFACT_DIR.mkdir(parents=True, exist_ok=True)
+
+    with sync_playwright() as playwright:
+        browser = playwright.chromium.launch(
+            executable_path=str(EDGE_PATH),
+            headless=True,
+        )
+        results = [verify_viewport(browser, viewport) for viewport in VIEWPORTS]
+        browser.close()
+
+    print(
+        json.dumps(
+            {
+                "base_url": BASE_URL,
+                "results": results,
+                "artifacts": str(ARTIFACT_DIR),
+            },
+            indent=2,
+        )
+    )
+
+
+if __name__ == "__main__":
+    main()
