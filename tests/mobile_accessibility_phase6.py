@@ -215,10 +215,60 @@ def verify_viewport(
     assert first_card_box is not None and first_card_box["width"] <= viewport["width"]
 
     featured_carousel = page.locator("[data-featured-carousel]")
+    featured_track = page.locator("[data-featured-track]")
+    intro_slide = page.locator("[data-hero-intro-slide]")
+    intro_heading = intro_slide.get_by_role(
+        "heading", name="Good tools deserve a second project."
+    )
     expect(featured_carousel).to_be_visible()
     expect(page.locator("[data-featured-slide]")).to_have_count(4)
+    expect(featured_track).to_have_attribute("data-active-index", "0")
     featured_interval = int(featured_carousel.get_attribute("data-interval-ms"))
     assert 6_000 <= featured_interval <= 9_000
+    intro_geometry = intro_slide.evaluate(
+        """element => {
+            const slide = element.getBoundingClientRect();
+            const heading = element.querySelector('h1').getBoundingClientRect();
+            const copy = element.querySelector('.hero-intro-copy');
+            return {
+                slide: { x: slide.x, y: slide.y, width: slide.width, height: slide.height },
+                heading: {
+                    x: heading.x,
+                    y: heading.y,
+                    width: heading.width,
+                    height: heading.height,
+                },
+                copyClientHeight: copy.clientHeight,
+                copyScrollHeight: copy.scrollHeight,
+            };
+        }"""
+    )
+    assert intro_geometry["heading"]["x"] >= intro_geometry["slide"]["x"]
+    assert (
+        intro_geometry["heading"]["x"] + intro_geometry["heading"]["width"]
+        <= intro_geometry["slide"]["x"] + intro_geometry["slide"]["width"] + 1
+    )
+    assert intro_geometry["heading"]["y"] >= intro_geometry["slide"]["y"]
+    assert (
+        intro_geometry["heading"]["y"] + intro_geometry["heading"]["height"]
+        <= intro_geometry["slide"]["y"] + intro_geometry["slide"]["height"] + 1
+    )
+    assert intro_geometry["copyScrollHeight"] <= intro_geometry["copyClientHeight"] + 1
+    expect(intro_heading).to_be_visible()
+    intro_heading.scroll_into_view_if_needed()
+    page.screenshot(
+        path=ARTIFACT_DIR / f"hero-carousel-intro-{viewport['width']}.png",
+        full_page=False,
+    )
+
+    expect(featured_track).to_have_attribute(
+        "data-active-index", "1", timeout=featured_interval + 2_500
+    )
+    expect(featured_carousel).to_have_attribute("data-last-advance", "auto")
+    expect(
+        page.locator('[data-featured-id="original-prusa-mini-plus"]')
+    ).to_have_attribute("aria-hidden", "true")
+
     featured_next = page.get_by_role("button", name="Next featured listing")
     featured_next.scroll_into_view_if_needed()
     featured_previous_box = assert_inside_viewport(
@@ -229,24 +279,24 @@ def verify_viewport(
     assert featured_previous_box["height"] >= 44
     assert featured_next_box["width"] >= 44
     assert featured_next_box["height"] >= 44
+    page.get_by_role("button", name="Previous featured listing").click()
+    expect(featured_track).to_have_attribute("data-active-index", "0")
     featured_next.click()
-    expect(page.locator("[data-featured-track]")).to_have_attribute(
-        "data-active-index", "1"
-    )
+    expect(featured_track).to_have_attribute("data-active-index", "1")
     expect(
         page.locator('[data-featured-id="raspberry-pi-4-workbench"]')
     ).to_have_attribute("aria-hidden", "false")
     page.wait_for_timeout(600)
     featured_geometry = featured_carousel.evaluate(
         """element => {
-            const viewport = element.querySelector('.featured-carousel-viewport')
-                .getBoundingClientRect();
+            const viewportElement = element.querySelector('.hero-carousel-viewport');
+            const viewport = viewportElement.getBoundingClientRect();
             const active = element.querySelector('[aria-hidden="false"]')
                 .getBoundingClientRect();
             return {
                 viewport: {
-                    x: viewport.x + element.querySelector('.featured-carousel-viewport').clientLeft,
-                    width: element.querySelector('.featured-carousel-viewport').clientWidth,
+                    x: viewport.x + viewportElement.clientLeft,
+                    width: viewportElement.clientWidth,
                 },
                 active: { x: active.x, width: active.width },
             };
@@ -260,7 +310,7 @@ def verify_viewport(
     ), featured_geometry
     assert_no_horizontal_page_overflow(page)
     page.screenshot(
-        path=ARTIFACT_DIR / f"featured-carousel-{viewport['width']}.png",
+        path=ARTIFACT_DIR / f"hero-carousel-product-{viewport['width']}.png",
         full_page=False,
     )
 
@@ -302,7 +352,7 @@ def verify_viewport(
         "footer_copy": measured_contrast(page, ".site-footer p", ".site-footer"),
         "chat_toggle": measured_contrast(page, "#catalogue-chat-toggle"),
         "featured_title": measured_contrast(
-            page, ".featured-carousel-copy h3", ".featured-carousel-copy"
+            page, ".hero-product-copy h2", ".hero-product-copy"
         ),
     }
     assert all(ratio >= 4.5 for ratio in contrast.values())
@@ -460,6 +510,8 @@ def verify_viewport(
         "featured_carousel": {
             "slides": 4,
             "interval_ms": featured_interval,
+            "unattended_auto_advance": True,
+            "intro_geometry": intro_geometry,
             "previous_control": featured_previous_box,
             "next_control": featured_next_box,
             "manual_advance": True,

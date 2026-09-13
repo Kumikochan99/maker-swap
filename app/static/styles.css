@@ -122,13 +122,8 @@ body {
   background-size: 32px 32px;
 }
 
-.featured-shelf {
-  background:
-    radial-gradient(circle at 8% 18%, rgb(249 115 22 / 10%), transparent 24rem),
-    linear-gradient(135deg, #fafaf9, #f5f5f4);
-}
-
-.featured-carousel-viewport {
+.hero-carousel-viewport {
+  height: clamp(34rem, 52vw, 39rem);
   box-shadow: 0 20px 55px rgb(15 23 42 / 12%);
 }
 
@@ -142,22 +137,43 @@ body {
   width: 100%;
 }
 
-.featured-carousel-media {
-  background: #ffedd5;
-}
-
-.featured-carousel-image {
+.hero-carousel-image {
   transition: transform 700ms ease;
 }
 
-.featured-carousel-link:hover .featured-carousel-image {
+[data-featured-link]:hover .hero-carousel-image {
   transform: scale(1.025);
 }
 
-.featured-carousel-copy {
-  background:
-    radial-gradient(circle at 100% 0%, rgb(249 115 22 / 24%), transparent 17rem),
-    #0f172a;
+.hero-intro-slide {
+  background: linear-gradient(135deg, #fff7ed, #fed7aa);
+}
+
+.hero-intro-copy {
+  z-index: 1;
+}
+
+.hero-intro-copy-inner {
+  width: min(100%, 18rem);
+}
+
+.hero-intro-heading {
+  font-size: clamp(2.7rem, 4.25vw, 3.4rem);
+  line-height: 0.94;
+}
+
+.hero-product-slide {
+  grid-template-rows: minmax(0, 1fr) auto;
+}
+
+.hero-product-media {
+  background: #ffedd5;
+}
+
+.hero-product-copy {
+  min-height: 13rem;
+  border-top: 1px solid #d6d3d1;
+  background: #fffaf5;
 }
 
 .featured-carousel-arrow {
@@ -514,6 +530,23 @@ main section[id] {
     border-radius: 1.25rem;
   }
 
+  .hero-carousel-viewport {
+    height: 41rem;
+  }
+
+  .hero-intro-slide .hero-carousel-image {
+    object-fit: contain;
+    object-position: center 63%;
+  }
+
+  .hero-intro-copy-inner {
+    width: 100%;
+  }
+
+  .hero-intro-heading {
+    font-size: clamp(2.25rem, 10vw, 2.6rem);
+  }
+
   body.catalogue-chat-open {
     overflow: hidden;
   }
@@ -534,6 +567,16 @@ main section[id] {
 @media (min-width: 640px) {
   .site-header-spacer {
     height: 6rem;
+  }
+
+  .hero-product-slide {
+    grid-template-columns: minmax(0, 1.45fr) minmax(18rem, 0.55fr);
+    grid-template-rows: minmax(0, 1fr);
+  }
+
+  .hero-product-copy {
+    border-left: 1px solid #d6d3d1;
+    border-top: 0;
   }
 
   #listing-grid[data-listing-view="gallery"] {

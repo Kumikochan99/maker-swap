@@ -80,12 +80,19 @@ def test_home_page_carousel_features_four_available_category_representatives() -
         FEATURED_LISTING_IDS
     )
     assert response.text.count("data-featured-slide") == 4
+    assert response.text.count("data-hero-intro-slide") == 1
+    assert response.text.count('class="hero-product-slide ') == 3
     assert 'data-interval-ms="7000"' in response.text
     assert 'aria-label="Previous featured listing"' in response.text
     assert 'aria-label="Next featured listing"' in response.text
     assert ">Art Supplies</p>" in response.text
+    assert "From the shelves" not in response.text
+    assert "featured-shelf" not in response.text
+    assert response.text.index("data-featured-carousel") < response.text.index(
+        'id="catalogue-search-form"'
+    )
     assert (
-        'src="http://testserver/static/featured-carousel.js?v=landing-polish-1"'
+        'src="http://testserver/static/featured-carousel.js?v=hero-carousel-2"'
         in response.text
     )
     for listing in featured:

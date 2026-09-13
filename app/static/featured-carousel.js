@@ -9,7 +9,6 @@
   const currentLabel = carousel.querySelector("[data-featured-current]");
   const status = carousel.querySelector("[data-featured-status]");
   const intervalMs = Number.parseInt(carousel.dataset.intervalMs || "", 10);
-  const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
 
   if (
     !track ||
@@ -31,8 +30,7 @@
   }
 
   function updateAutoState() {
-    const paused =
-      pointerInside || focusInside || document.hidden || reducedMotion.matches;
+    const paused = pointerInside || focusInside || document.hidden;
     carousel.dataset.autoState = paused ? "paused" : "running";
     return !paused;
   }
@@ -44,10 +42,11 @@
     }
   }
 
-  function render(index, announce = false) {
+  function render(index, announce = false, source = "manual") {
     activeIndex = normalizedIndex(index);
     track.style.transform = `translate3d(-${activeIndex * 100}%, 0, 0)`;
     track.dataset.activeIndex = String(activeIndex);
+    carousel.dataset.lastAdvance = source;
 
     slides.forEach((slide, slideIndex) => {
       const isActive = slideIndex === activeIndex;
@@ -61,7 +60,9 @@
 
     if (currentLabel) currentLabel.textContent = String(activeIndex + 1);
     if (announce && status) {
-      const title = slides[activeIndex].querySelector("h3")?.textContent?.trim();
+      const title = slides[activeIndex]
+        .querySelector("h1, h2, h3")
+        ?.textContent?.trim();
       status.textContent = `Showing featured listing ${activeIndex + 1} of ${slides.length}${title ? `: ${title}` : "."}`;
     }
   }
@@ -70,7 +71,12 @@
     stopTimer();
     if (!updateAutoState()) return;
     timerId = window.setTimeout(() => {
-      render(activeIndex + 1);
+      const advanceCount = Number.parseInt(
+        carousel.dataset.autoAdvanceCount || "0",
+        10,
+      );
+      carousel.dataset.autoAdvanceCount = String(advanceCount + 1);
+      render(activeIndex + 1, false, "auto");
       scheduleNext();
     }, intervalMs);
   }
@@ -113,8 +119,8 @@
   });
 
   document.addEventListener("visibilitychange", scheduleNext);
-  reducedMotion.addEventListener("change", scheduleNext);
 
-  render(0);
+  carousel.dataset.autoAdvanceCount = "0";
+  render(0, false, "initial");
   scheduleNext();
 })();

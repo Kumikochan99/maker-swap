@@ -166,7 +166,6 @@ def test_featured_carousel_auto_advances_and_pauses_on_hover(
 ) -> None:
     context = browser.new_context(viewport={"width": 1280, "height": 720})
     page = context.new_page()
-    page.clock.install()
     page.goto(browser_base_url, wait_until="networkidle")
     carousel = page.locator("[data-featured-carousel]")
     track = page.locator("[data-featured-track]")
@@ -174,19 +173,48 @@ def test_featured_carousel_auto_advances_and_pauses_on_hover(
     expect(page.locator("[data-featured-slide]")).to_have_count(4)
     expect(track).to_have_attribute("data-active-index", "0")
     expect(carousel).to_have_attribute("data-auto-state", "running")
+    expect(carousel).to_have_attribute("data-auto-advance-count", "0")
+    intro_copy_style = page.locator(".hero-intro-copy").evaluate(
+        """element => {
+            const style = getComputedStyle(element);
+            return {
+                backgroundColor: style.backgroundColor,
+                backgroundImage: style.backgroundImage,
+            };
+        }"""
+    )
+    assert intro_copy_style == {
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "backgroundImage": "none",
+    }
 
-    page.clock.fast_forward(7_100)
-    expect(track).to_have_attribute("data-active-index", "1")
+    expect(track).to_have_attribute("data-active-index", "1", timeout=9_000)
+    expect(carousel).to_have_attribute("data-last-advance", "auto")
+    expect(carousel).to_have_attribute("data-auto-advance-count", "1")
+    expect(
+        page.locator('[data-featured-id="original-prusa-mini-plus"]')
+    ).to_have_attribute("aria-hidden", "true")
+    page.wait_for_timeout(600)
+    intro_heading_box = page.locator(".hero-intro-heading").bounding_box()
+    carousel_viewport_box = page.locator(".hero-carousel-viewport").bounding_box()
+    assert intro_heading_box is not None
+    assert carousel_viewport_box is not None
+    assert (
+        intro_heading_box["x"] + intro_heading_box["width"]
+        <= carousel_viewport_box["x"] + 1
+    )
+
+    expect(track).to_have_attribute("data-active-index", "2", timeout=9_000)
+    expect(carousel).to_have_attribute("data-auto-advance-count", "2")
 
     carousel.hover()
     expect(carousel).to_have_attribute("data-auto-state", "paused")
-    page.clock.fast_forward(14_000)
-    expect(track).to_have_attribute("data-active-index", "1")
-
-    page.locator(".hero-grid h1").hover()
-    expect(carousel).to_have_attribute("data-auto-state", "running")
-    page.clock.fast_forward(7_100)
+    page.wait_for_timeout(7_500)
     expect(track).to_have_attribute("data-active-index", "2")
+    expect(carousel).to_have_attribute("data-auto-advance-count", "2")
+
+    page.locator("#catalogue-search-query").hover()
+    expect(carousel).to_have_attribute("data-auto-state", "running")
     context.close()
 
 
@@ -518,8 +546,15 @@ def test_featured_carousel_controls_fit_mobile_viewports(
         {"width": width, "height": height},
     )
     carousel = page.locator("[data-featured-carousel]")
+    intro_slide = page.locator("[data-hero-intro-slide]")
+    intro_heading = intro_slide.get_by_role(
+        "heading", name="Good tools deserve a second project."
+    )
     previous_button = page.get_by_role("button", name="Previous featured listing")
     next_button = page.get_by_role("button", name="Next featured listing")
+    expect(page.locator("[data-featured-track]")).to_have_attribute(
+        "data-active-index", "0"
+    )
     next_button.scroll_into_view_if_needed()
 
     dimensions = page.evaluate(
@@ -533,6 +568,36 @@ def test_featured_carousel_controls_fit_mobile_viewports(
     assert dimensions["body"] <= dimensions["viewport"] + 1
     assert carousel.get_attribute("data-interval-ms") == "7000"
     assert 6_000 <= int(carousel.get_attribute("data-interval-ms")) <= 9_000
+    intro_geometry = intro_slide.evaluate(
+        """element => {
+            const slide = element.getBoundingClientRect();
+            const heading = element.querySelector('h1').getBoundingClientRect();
+            const copy = element.querySelector('.hero-intro-copy');
+            return {
+                slide: { x: slide.x, y: slide.y, width: slide.width, height: slide.height },
+                heading: {
+                    x: heading.x,
+                    y: heading.y,
+                    width: heading.width,
+                    height: heading.height,
+                },
+                copyClientHeight: copy.clientHeight,
+                copyScrollHeight: copy.scrollHeight,
+            };
+        }"""
+    )
+    assert intro_geometry["heading"]["x"] >= intro_geometry["slide"]["x"]
+    assert (
+        intro_geometry["heading"]["x"] + intro_geometry["heading"]["width"]
+        <= intro_geometry["slide"]["x"] + intro_geometry["slide"]["width"] + 1
+    )
+    assert intro_geometry["heading"]["y"] >= intro_geometry["slide"]["y"]
+    assert (
+        intro_geometry["heading"]["y"] + intro_geometry["heading"]["height"]
+        <= intro_geometry["slide"]["y"] + intro_geometry["slide"]["height"] + 1
+    )
+    assert intro_geometry["copyScrollHeight"] <= intro_geometry["copyClientHeight"] + 1
+    expect(intro_heading).to_be_visible()
 
     for button in (previous_button, next_button):
         box = button.bounding_box()
