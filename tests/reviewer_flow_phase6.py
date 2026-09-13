@@ -45,6 +45,13 @@ def run_reviewer_flow(page: Page) -> dict[str, object]:
     assert home_response is not None and home_response.ok
     expect(page.get_by_role("heading", name="Good tools deserve a second project.")).to_be_visible()
     expect(page.locator("#listing-grid > [data-listing-id]")).to_have_count(16)
+    expect(page.locator("#listing-grid")).to_have_attribute("data-listing-view", "list")
+    page.get_by_role("button", name="Gallery view").click()
+    expect(page.locator("#listing-grid")).to_have_attribute(
+        "data-listing-view", "gallery"
+    )
+    page.get_by_role("button", name="List view").click()
+    expect(page.locator("#listing-grid")).to_have_attribute("data-listing-view", "list")
 
     page.locator("#category-menu-toggle").click()
     expect(page.locator("#category-menu-toggle")).to_have_attribute(
@@ -135,6 +142,7 @@ def run_reviewer_flow(page: Page) -> dict[str, object]:
         "base_url": BASE_URL,
         "private_context": True,
         "browse_listing_count": 16,
+        "browse_view_toggle": "list -> gallery -> list",
         "category_listing_count": 4,
         "category_scroll_y": category_scroll_y,
         "search_query": search_query,

@@ -138,6 +138,87 @@ main section[id] {
   box-shadow: 0 18px 40px rgb(15 23 42 / 12%);
 }
 
+.listing-view-button:hover {
+  background: #fff7ed;
+  color: #c2410c;
+}
+
+.listing-view-button[aria-pressed="true"] {
+  background: #0f172a;
+  color: #fff7ed;
+  box-shadow: 0 5px 14px rgb(15 23 42 / 18%);
+}
+
+#listing-grid[data-listing-view="gallery"] {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+#listing-grid[data-listing-view="gallery"] [data-card-image-frame] {
+  aspect-ratio: 1 / 1;
+}
+
+#listing-grid[data-listing-view="gallery"] [data-card-content] {
+  min-height: 10.5rem;
+  padding: 0.8rem;
+}
+
+#listing-grid[data-listing-view="gallery"] [data-card-meta] {
+  order: 3;
+  justify-content: flex-start;
+  margin-top: auto;
+  padding-top: 0.65rem;
+  font-size: 0.625rem;
+  letter-spacing: 0.08em;
+}
+
+#listing-grid[data-listing-view="gallery"] [data-card-category],
+#listing-grid[data-listing-view="gallery"] [data-card-description],
+#listing-grid[data-listing-view="gallery"] [data-card-pickup-block] {
+  display: none;
+}
+
+#listing-grid[data-listing-view="gallery"] [data-card-condition] {
+  padding: 0.3rem 0.55rem;
+  line-height: 1rem;
+}
+
+#listing-grid[data-listing-view="gallery"] [data-card-title] {
+  order: 1;
+  display: -webkit-box;
+  overflow: hidden;
+  margin-top: 0;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  font-size: 0.95rem;
+  line-height: 1.25rem;
+  overflow-wrap: anywhere;
+}
+
+#listing-grid[data-listing-view="gallery"] [data-card-footer] {
+  order: 2;
+  display: block;
+  margin-top: 0;
+  padding-top: 0.55rem;
+}
+
+#listing-grid[data-listing-view="gallery"] [data-card-price] {
+  font-size: 1.25rem;
+  line-height: 1.6rem;
+}
+
+#listing-grid[data-listing-view="gallery"] .listing-status-badge {
+  top: 0.55rem;
+  left: 0.55rem;
+  max-width: calc(100% - 1.1rem);
+  padding: 0.35rem 0.55rem;
+  overflow: hidden;
+  font-size: 0.66rem;
+  letter-spacing: 0.08em;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .listing-status-badge {
   border: 1px solid transparent;
   font-size: 0.72rem;
@@ -369,6 +450,33 @@ main section[id] {
 @media (min-width: 640px) {
   .site-header-spacer {
     height: 6rem;
+  }
+
+  #listing-grid[data-listing-view="gallery"] {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1rem;
+  }
+
+  #listing-grid[data-listing-view="gallery"] [data-card-content] {
+    min-height: 10rem;
+    padding: 1rem;
+  }
+
+  #listing-grid[data-listing-view="gallery"] [data-card-title] {
+    font-size: 1rem;
+    line-height: 1.3rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  #listing-grid[data-listing-view="gallery"] {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1280px) {
+  #listing-grid[data-listing-view="gallery"] {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
   }
 }
 

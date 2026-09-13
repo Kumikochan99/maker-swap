@@ -61,36 +61,59 @@
       </div>
     </div>
 
-    <div class="mt-12">
-      <div>
+    <div class="mt-12 flex flex-wrap items-end justify-between gap-5">
+      <div class="min-w-0">
         <p class="text-sm font-bold uppercase tracking-[0.18em] text-slate-500">The workbench</p>
         <h2 id="catalogue-heading" class="mt-2 font-display text-3xl font-bold tracking-tight sm:text-4xl" tabindex="-1">
           {% if selected_category %}{{ selected_category }}{% else %}Browse everything{% endif %}
         </h2>
       </div>
+
+      <div class="listing-view-control ml-auto flex flex-none items-center gap-2" role="group" aria-label="Choose listing view">
+        <span class="hidden text-xs font-bold uppercase tracking-[0.14em] text-slate-500 sm:inline">View</span>
+        <div class="listing-view-toggle inline-flex rounded-2xl border border-stone-300 bg-white p-1 shadow-sm">
+          <button type="button" class="listing-view-button grid h-11 w-11 place-items-center rounded-xl text-slate-600 transition" data-listing-view-button="list" aria-controls="listing-grid" aria-pressed="true" title="List view">
+            <span class="sr-only">List view</span>
+            <svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <path d="M9 6h11M9 12h11M9 18h11"></path>
+              <path d="M4 6h.01M4 12h.01M4 18h.01" stroke-linecap="round" stroke-width="3"></path>
+            </svg>
+          </button>
+          <button type="button" class="listing-view-button grid h-11 w-11 place-items-center rounded-xl text-slate-600 transition" data-listing-view-button="gallery" aria-controls="listing-grid" aria-pressed="false" title="Gallery view">
+            <span class="sr-only">Gallery view</span>
+            <svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <rect x="4" y="4" width="6" height="6" rx="1"></rect>
+              <rect x="14" y="4" width="6" height="6" rx="1"></rect>
+              <rect x="4" y="14" width="6" height="6" rx="1"></rect>
+              <rect x="14" y="14" width="6" height="6" rx="1"></rect>
+            </svg>
+          </button>
+        </div>
+      </div>
+      <p id="listing-view-status" class="sr-only" role="status" aria-live="polite"></p>
     </div>
 
-    <div id="listing-grid" class="mt-9 grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 {% if not listings %}hidden{% endif %}" aria-live="off">
+    <div id="listing-grid" data-listing-view="list" class="mt-9 grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 {% if not listings %}hidden{% endif %}" aria-live="off">
       {% if listings %}
         {% for listing in listings %}
           <article data-listing-id="{{ listing.id }}" data-listing-status="{{ listing.status }}" class="listing-card group overflow-hidden rounded-3xl border border-stone-200 bg-white">
             <a href="{{ url_for('listing_detail', listing_id=listing.id) }}" class="block h-full" aria-label="View {{ listing.title }} for S${{ listing.price }}{% if listing.status != 'Available' %}, status {{ listing.status }}{% endif %}">
-              <div class="relative aspect-[4/3] overflow-hidden bg-stone-100">
+              <div data-card-image-frame class="relative aspect-[4/3] overflow-hidden bg-stone-100">
                 {% if listing.status != 'Available' %}
                   <span class="listing-status-badge absolute left-4 top-4 z-10 rounded-full px-3 py-1.5 text-xs font-bold uppercase tracking-[0.12em] shadow-sm" data-status="{{ listing.status }}">{{ listing.status }}</span>
                 {% endif %}
                 <img src="{{ listing.image }}" alt="Illustration for {{ listing.title }}" class="h-full w-full object-cover transition duration-500 group-hover:scale-[1.04]" loading="lazy">
               </div>
-              <div class="flex min-h-64 flex-col p-5">
-                <div class="flex items-center justify-between gap-3 text-xs font-bold uppercase tracking-[0.12em]">
-                  <span class="text-orange-700">{{ listing.category }}</span>
-                  <span class="rounded-full bg-stone-100 px-2.5 py-1 text-slate-600">{{ listing.condition }}</span>
+              <div data-card-content class="flex min-h-64 flex-col p-5">
+                <div data-card-meta class="flex items-center justify-between gap-3 text-xs font-bold uppercase tracking-[0.12em]">
+                  <span data-card-category class="text-orange-700">{{ listing.category }}</span>
+                  <span data-card-condition class="rounded-full bg-stone-100 px-2.5 py-1 text-slate-600">{{ listing.condition }}</span>
                 </div>
-                <h3 class="mt-4 font-display text-xl font-bold leading-tight tracking-tight text-slate-950">{{ listing.title }}</h3>
-                <p class="description-clamp mt-3 text-sm leading-6 text-slate-600">{{ listing.description }}</p>
-                <div class="mt-auto flex items-end justify-between gap-4 pt-5">
-                  <p class="font-display text-2xl font-bold text-slate-950">S${{ "{:,}".format(listing.price) }}</p>
-                  <p class="text-right text-xs font-semibold text-slate-500">Pickup<br>{{ listing.pickup_area }}</p>
+                <h3 data-card-title class="mt-4 font-display text-xl font-bold leading-tight tracking-tight text-slate-950">{{ listing.title }}</h3>
+                <p data-card-description class="description-clamp mt-3 text-sm leading-6 text-slate-600">{{ listing.description }}</p>
+                <div data-card-footer class="mt-auto flex items-end justify-between gap-4 pt-5">
+                  <p data-card-price class="font-display text-2xl font-bold text-slate-950">S${{ "{:,}".format(listing.price) }}</p>
+                  <p data-card-pickup-block class="text-right text-xs font-semibold text-slate-500">Pickup<br>{{ listing.pickup_area }}</p>
                 </div>
               </div>
             </a>
@@ -108,20 +131,20 @@
     <template id="listing-card-template">
       <article data-listing-id data-listing-status class="listing-card group overflow-hidden rounded-3xl border border-stone-200 bg-white">
         <a data-card-link href="#" class="block h-full">
-          <div class="relative aspect-[4/3] overflow-hidden bg-stone-100">
+          <div data-card-image-frame class="relative aspect-[4/3] overflow-hidden bg-stone-100">
             <span data-card-status class="listing-status-badge absolute left-4 top-4 z-10 hidden rounded-full px-3 py-1.5 text-xs font-bold uppercase tracking-[0.12em] shadow-sm"></span>
             <img data-card-image src="" alt="" class="h-full w-full object-cover transition duration-500 group-hover:scale-[1.04]" loading="lazy">
           </div>
-          <div class="flex min-h-64 flex-col p-5">
-            <div class="flex items-center justify-between gap-3 text-xs font-bold uppercase tracking-[0.12em]">
+          <div data-card-content class="flex min-h-64 flex-col p-5">
+            <div data-card-meta class="flex items-center justify-between gap-3 text-xs font-bold uppercase tracking-[0.12em]">
               <span data-card-category class="text-orange-700"></span>
               <span data-card-condition class="rounded-full bg-stone-100 px-2.5 py-1 text-slate-600"></span>
             </div>
             <h3 data-card-title class="mt-4 font-display text-xl font-bold leading-tight tracking-tight text-slate-950"></h3>
             <p data-card-description class="description-clamp mt-3 text-sm leading-6 text-slate-600"></p>
-            <div class="mt-auto flex items-end justify-between gap-4 pt-5">
+            <div data-card-footer class="mt-auto flex items-end justify-between gap-4 pt-5">
               <p data-card-price class="font-display text-2xl font-bold text-slate-950"></p>
-              <p class="text-right text-xs font-semibold text-slate-500">Pickup<br><span data-card-pickup></span></p>
+              <p data-card-pickup-block class="text-right text-xs font-semibold text-slate-500">Pickup<br><span data-card-pickup></span></p>
             </div>
           </div>
         </a>
@@ -132,5 +155,6 @@
 {% endblock %}
 
 {% block scripts %}
+<script src="{{ url_for('static', path='/catalogue-view.js') }}?v=gallery-view-1" defer></script>
 <script src="{{ url_for('static', path='/search.js') }}?v=polish-status-1" defer></script>
 {% endblock %}

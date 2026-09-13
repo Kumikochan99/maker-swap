@@ -178,6 +178,13 @@ def test_clear_search_restores_the_full_catalogue(
     )
 
     expect(page.locator('[data-listing-id]')).to_have_count(4)
+    page.get_by_role("button", name="Gallery view").click()
+    expect(page.locator("#listing-grid")).to_have_attribute(
+        "data-listing-view", "gallery"
+    )
+    assert page.locator("#listing-grid").evaluate(
+        "element => getComputedStyle(element).gridTemplateColumns.split(' ').length"
+    ) == 5
     page.locator("#catalogue-search-query").fill("repair circuit boards")
     page.locator("#catalogue-search-submit").click()
     expect(page.locator("#catalogue-heading")).to_have_text("AI search matches")
@@ -185,6 +192,8 @@ def test_clear_search_restores_the_full_catalogue(
     expect(page.locator("[data-card-status]")).to_be_visible()
     expect(page.locator("[data-card-status]")).to_have_text("Reserved")
     expect(page.locator('[data-listing-status="Reserved"]')).to_have_count(1)
+    expect(page.locator("[data-card-description]")).to_be_hidden()
+    expect(page.locator("[data-card-condition]")).to_be_visible()
 
     with page.expect_navigation(wait_until="domcontentloaded"):
         page.locator("#catalogue-search-clear").click()
@@ -192,9 +201,164 @@ def test_clear_search_restores_the_full_catalogue(
     expect(page).to_have_url(f"{browser_base_url}/#listings")
     expect(page.locator("#catalogue-heading")).to_have_text("Browse everything")
     expect(page.locator('[data-listing-id]')).to_have_count(16)
+    expect(page.locator("#listing-grid")).to_have_attribute(
+        "data-listing-view", "gallery"
+    )
     expect(page.locator("#catalogue-search-query")).to_have_value("")
     expect(page.locator("#catalogue-search-clear")).to_have_class(re.compile(r"\bhidden\b"))
 
+    page.context.close()
+
+
+def test_gallery_preference_survives_category_filtering(
+    browser: Browser,
+    browser_base_url: str,
+) -> None:
+    page = open_page(browser, browser_base_url)
+
+    expect(page.locator("#listing-grid")).to_have_attribute("data-listing-view", "list")
+    page.get_by_role("button", name="Gallery view").click()
+    expect(page.locator("#listing-grid")).to_have_attribute(
+        "data-listing-view", "gallery"
+    )
+
+    page.locator("#category-menu-toggle").click()
+    page.get_by_role("link", name="Electronics", exact=True).click()
+    page.wait_for_url(re.compile(r"\?category=Electronics#listings$"))
+
+    expect(page.locator("#listing-grid")).to_have_attribute(
+        "data-listing-view", "gallery"
+    )
+    expect(page.locator('[data-listing-id]')).to_have_count(4)
+    expect(page.locator("#catalogue-heading")).to_have_text("Electronics")
+    assert page.locator("#listing-grid").evaluate(
+        "element => getComputedStyle(element).gridTemplateColumns.split(' ').length"
+    ) == 5
+    expect(page.get_by_role("button", name="Gallery view")).to_have_attribute(
+        "aria-pressed", "true"
+    )
+    page.context.close()
+
+
+@pytest.mark.parametrize("width,height", [(390, 844), (430, 932)])
+def test_compact_catalogue_gallery_is_two_columns_and_readable_on_mobile(
+    browser: Browser,
+    browser_base_url: str,
+    width: int,
+    height: int,
+) -> None:
+    page = open_page(
+        browser,
+        browser_base_url,
+        "/#listings",
+        {"width": width, "height": height},
+    )
+    grid = page.locator("#listing-grid")
+    first_card = page.locator('[data-listing-id="original-prusa-mini-plus"]')
+    list_button = page.get_by_role("button", name="List view")
+    gallery_button = page.get_by_role("button", name="Gallery view")
+
+    expect(grid).to_have_attribute("data-listing-view", "list")
+    expect(list_button).to_have_attribute("aria-pressed", "true")
+    expect(first_card.locator("[data-card-description]")).to_be_visible()
+    list_state = grid.evaluate(
+        """element => ({
+            columns: getComputedStyle(element).gridTemplateColumns.split(' ').length,
+            cardWidth: element.querySelector('[data-listing-id]').getBoundingClientRect().width,
+            image: (() => {
+                const box = element.querySelector('[data-card-image-frame]').getBoundingClientRect();
+                return { width: box.width, height: box.height };
+            })(),
+        })"""
+    )
+    assert list_state["columns"] == 1
+    assert list_state["image"]["width"] / list_state["image"]["height"] == pytest.approx(
+        4 / 3, rel=0.02
+    )
+
+    gallery_button.focus()
+    gallery_button.press("Enter")
+    expect(grid).to_have_attribute("data-listing-view", "gallery")
+    expect(gallery_button).to_have_attribute("aria-pressed", "true")
+    expect(list_button).to_have_attribute("aria-pressed", "false")
+    expect(page.locator("#listing-view-status")).to_have_text("Gallery view selected.")
+
+    gallery_state = grid.evaluate(
+        """element => ({
+            columns: getComputedStyle(element).gridTemplateColumns.split(' ').length,
+            documentWidth: document.documentElement.scrollWidth,
+            viewportWidth: window.innerWidth,
+            cards: [...element.querySelectorAll('[data-listing-id]')].slice(0, 2).map(card => {
+                const box = card.getBoundingClientRect();
+                return { x: box.x, y: box.y, width: box.width };
+            }),
+            image: (() => {
+                const box = element.querySelector('[data-card-image-frame]').getBoundingClientRect();
+                return { width: box.width, height: box.height };
+            })(),
+        })"""
+    )
+    assert gallery_state["columns"] == 2
+    assert gallery_state["documentWidth"] <= gallery_state["viewportWidth"] + 1
+    assert gallery_state["cards"][0]["y"] == pytest.approx(
+        gallery_state["cards"][1]["y"], abs=1
+    )
+    assert gallery_state["cards"][0]["x"] < gallery_state["cards"][1]["x"]
+    assert gallery_state["cards"][0]["width"] < list_state["cardWidth"] * 0.55
+    assert gallery_state["image"]["width"] / gallery_state["image"]["height"] == pytest.approx(
+        1, rel=0.02
+    )
+
+    expect(first_card.locator("[data-card-title]")).to_be_visible()
+    expect(first_card.locator("[data-card-price]")).to_be_visible()
+    expect(first_card.locator("[data-card-condition]")).to_be_visible()
+    expect(first_card.locator("[data-card-description]")).to_be_hidden()
+    expect(first_card.locator("[data-card-category]")).to_be_hidden()
+    expect(first_card.locator("[data-card-pickup-block]")).to_be_hidden()
+
+    for listing_id, expected_status in (
+        ("bambu-lab-a1-mini", "Reserved"),
+        ("arduino-sensor-starter-kit", "Sold"),
+    ):
+        card = page.locator(f'[data-listing-id="{listing_id}"]')
+        badge = card.locator(f'[data-status="{expected_status}"]')
+        expect(badge).to_be_visible()
+        badge_state = badge.evaluate(
+            """element => {
+                const style = getComputedStyle(element);
+                const badge = element.getBoundingClientRect();
+                const frame = element.closest('[data-card-image-frame]').getBoundingClientRect();
+                return {
+                    color: style.color,
+                    background: style.backgroundColor,
+                    fontSize: parseFloat(style.fontSize),
+                    badge: { x: badge.x, y: badge.y, width: badge.width, height: badge.height },
+                    frame: { x: frame.x, y: frame.y, width: frame.width, height: frame.height },
+                };
+            }"""
+        )
+        assert badge_state["fontSize"] >= 10
+        assert contrast_ratio(
+            css_channels(badge_state["color"])[:3],
+            css_channels(badge_state["background"])[:3],
+        ) >= 4.5
+        assert badge_state["badge"]["x"] >= badge_state["frame"]["x"]
+        assert (
+            badge_state["badge"]["x"] + badge_state["badge"]["width"]
+            <= badge_state["frame"]["x"] + badge_state["frame"]["width"] + 1
+        )
+
+    list_button.click()
+    expect(grid).to_have_attribute("data-listing-view", "list")
+    restored_state = grid.evaluate(
+        """element => ({
+            columns: getComputedStyle(element).gridTemplateColumns.split(' ').length,
+            cardWidth: element.querySelector('[data-listing-id]').getBoundingClientRect().width,
+        })"""
+    )
+    assert restored_state["columns"] == 1
+    assert restored_state["cardWidth"] == pytest.approx(list_state["cardWidth"], abs=1)
+    expect(first_card.locator("[data-card-description]")).to_be_visible()
     page.context.close()
 
 

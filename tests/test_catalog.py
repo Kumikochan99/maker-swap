@@ -73,6 +73,22 @@ def test_fixed_navigation_is_the_only_category_control() -> None:
     assert ">Browse</a>" not in response.text
 
 
+def test_browse_page_defaults_to_the_existing_list_layout_with_view_controls() -> None:
+    response = client.get("/")
+
+    assert response.status_code == 200
+    assert 'id="listing-grid" data-listing-view="list"' in response.text
+    assert "mt-9 grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4" in response.text
+    assert 'data-listing-view-button="list"' in response.text
+    assert 'data-listing-view-button="gallery"' in response.text
+    assert 'aria-label="Choose listing view"' in response.text
+    assert 'aria-pressed="true" title="List view"' in response.text
+    assert 'aria-pressed="false" title="Gallery view"' in response.text
+    assert 'src="http://testserver/static/catalogue-view.js?v=gallery-view-1"' in response.text
+    assert "data-card-image-frame" in response.text
+    assert "data-card-content" in response.text
+
+
 def test_category_filter_limits_visible_listings() -> None:
     response = client.get("/", params={"category": "Electronics"})
 

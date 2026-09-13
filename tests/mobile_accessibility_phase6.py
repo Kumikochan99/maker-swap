@@ -6,6 +6,7 @@ import re
 import tempfile
 from pathlib import Path
 
+import pytest
 from playwright.sync_api import Browser, Page, expect, sync_playwright
 
 
@@ -221,7 +222,56 @@ def verify_viewport(
     }
     assert all(ratio >= 4.5 for ratio in contrast.values())
 
+    gallery_button = page.get_by_role("button", name="Gallery view")
+    gallery_button.click()
+    expect(page.locator("#listing-grid")).to_have_attribute(
+        "data-listing-view", "gallery"
+    )
+    gallery_metrics = page.locator("#listing-grid").evaluate(
+        """element => ({
+            columns: getComputedStyle(element).gridTemplateColumns.split(' ').length,
+            cardWidths: [...element.querySelectorAll(':scope > [data-listing-id]')]
+                .slice(0, 2)
+                .map(card => card.getBoundingClientRect().width),
+            firstRowY: [...element.querySelectorAll(':scope > [data-listing-id]')]
+                .slice(0, 2)
+                .map(card => card.getBoundingClientRect().y),
+        })"""
+    )
+    assert gallery_metrics["columns"] == 2
+    assert gallery_metrics["firstRowY"][0] == pytest.approx(
+        gallery_metrics["firstRowY"][1], abs=1
+    )
+    assert all(width < first_card_box["width"] * 0.55 for width in gallery_metrics["cardWidths"])
+    assert_no_horizontal_page_overflow(page)
+
+    badge_contrast = {}
+    for listing_id, status_name in (
+        ("bambu-lab-a1-mini", "Reserved"),
+        ("arduino-sensor-starter-kit", "Sold"),
+    ):
+        selector = f'[data-listing-id="{listing_id}"] [data-status="{status_name}"]'
+        expect(page.locator(selector)).to_be_visible()
+        font_size = page.locator(selector).evaluate(
+            "element => parseFloat(getComputedStyle(element).fontSize)"
+        )
+        assert font_size >= 10
+        badge_contrast[status_name.lower()] = measured_contrast(page, selector)
+    assert all(ratio >= 4.5 for ratio in badge_contrast.values())
+
     reserved_card = page.locator('[data-listing-id="bambu-lab-a1-mini"]')
+    reserved_card.scroll_into_view_if_needed()
+    page.screenshot(
+        path=ARTIFACT_DIR / f"browse-gallery-{viewport['width']}.png",
+        full_page=False,
+    )
+
+    page.get_by_role("button", name="List view").click()
+    expect(page.locator("#listing-grid")).to_have_attribute("data-listing-view", "list")
+    restored_width = page.locator("#listing-grid > [data-listing-id]").first.bounding_box()
+    assert restored_width is not None
+    assert restored_width["width"] == pytest.approx(first_card_box["width"], abs=1)
+
     reserved_card.scroll_into_view_if_needed()
     expect(reserved_card.locator('[data-status="Reserved"]')).to_be_visible()
     page.screenshot(
@@ -284,6 +334,14 @@ def verify_viewport(
         },
         "keyboard": keyboard,
         "glass_navigation": glass_navigation,
+        "browse_gallery": {
+            "columns": gallery_metrics["columns"],
+            "card_widths": gallery_metrics["cardWidths"],
+            "badge_contrast": {
+                name: round(ratio, 2) for name, ratio in badge_contrast.items()
+            },
+            "list_width_restored": restored_width["width"],
+        },
         "contrast_ratios": {
             name: round(ratio, 2) for name, ratio in contrast.items()
         },
