@@ -130,6 +130,9 @@ def test_category_filters_return_to_catalogue_anchor() -> None:
     assert 'id="listings"' in response.text
     assert response.text.count("#listings\"") >= 6
     assert "?category=Electronics#listings" in response.text
+    assert response.text.index('id="catalogue-search-form"') < response.text.index(
+        'id="listings"'
+    ) < response.text.index('id="listing-grid"')
 
 
 def test_unknown_category_has_a_useful_empty_state() -> None:

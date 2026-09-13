@@ -160,6 +160,35 @@ def test_category_filter_preserves_catalogue_scroll_position(
     page.context.close()
 
 
+def test_category_chip_preserves_catalogue_scroll_position(
+    browser: Browser,
+    browser_base_url: str,
+) -> None:
+    page = open_page(browser, browser_base_url)
+    electronics = page.locator(".category-chip-nav").get_by_role(
+        "link", name="Electronics", exact=True
+    )
+
+    assert electronics.get_attribute("href").endswith(
+        "/?category=Electronics#listings"
+    )
+    electronics.click()
+    page.wait_for_url(re.compile(r"\?category=Electronics#listings$"))
+    expect(page.locator("#listing-grid > [data-listing-id]")).to_have_count(4)
+
+    scroll_position = page.evaluate("window.scrollY")
+    listings_top = page.locator("#listings").evaluate(
+        "element => element.getBoundingClientRect().top"
+    )
+    heading_top = page.locator("#catalogue-heading").evaluate(
+        "element => element.getBoundingClientRect().top"
+    )
+    assert scroll_position > 0
+    assert 80 <= listings_top <= 130
+    assert 80 <= heading_top <= 180
+    page.context.close()
+
+
 def test_clear_search_restores_the_full_catalogue(
     browser: Browser,
     browser_base_url: str,
