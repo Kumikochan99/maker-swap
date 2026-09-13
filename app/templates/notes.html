@@ -3,30 +3,220 @@
 {% block title %}/notes - Maker Swap{% endblock %}
 
 {% block content %}
-<main id="main-content" class="mx-auto max-w-4xl px-5 py-12 sm:px-8 sm:py-16">
-  <p class="text-sm font-bold uppercase tracking-[0.2em] text-orange-700">Build notes</p>
-  <h1 class="mt-4 font-display text-5xl font-bold tracking-tight sm:text-6xl">What this demo is - and is not.</h1>
-  <p class="mt-6 max-w-3xl text-lg leading-8 text-slate-600">Maker Swap is a second-hand marketplace demo for makers and hobbyists in Singapore. It currently provides a public, mobile-friendly catalogue and item detail flow without sign-in.</p>
+<main id="main-content">
+  <section class="border-b border-stone-200 bg-slate-950 text-white">
+    <div class="mx-auto max-w-7xl px-5 py-14 sm:px-8 sm:py-20">
+      <div class="max-w-4xl">
+        <p class="text-sm font-bold uppercase tracking-[0.2em] text-orange-400">Build notes / Phase 5</p>
+        <h1 class="mt-4 font-display text-5xl font-bold tracking-tight sm:text-6xl">What this demo is - and is not.</h1>
+        <p class="mt-6 max-w-3xl text-lg leading-8 text-slate-300 sm:text-xl">
+          A candid account of the product, the real AI behind it, and the tradeoffs made to ship a focused assessment in 72 hours.
+        </p>
+      </div>
 
-  <div class="mt-12 grid gap-5 sm:grid-cols-2">
-    <section class="rounded-3xl border border-stone-200 bg-white p-6">
-      <h2 class="font-display text-2xl font-bold">Seeded demo data</h2>
-      <p class="mt-3 leading-7 text-slate-600">The 16 listings, prices, conditions, descriptions, images and pickup areas are seeded. Pickup areas are display text, not seller identities or live locations.</p>
-    </section>
-    <section class="rounded-3xl border border-stone-200 bg-white p-6">
-      <h2 class="font-display text-2xl font-bold">Deliberate boundaries</h2>
-      <p class="mt-3 leading-7 text-slate-600">There are no accounts, payments, messaging, shipping, seller profiles or multi-vendor systems. Those are outside this assessment's core flow.</p>
-    </section>
-    <section class="rounded-3xl border border-stone-200 bg-white p-6">
-      <h2 class="font-display text-2xl font-bold">AI usage</h2>
-      <p class="mt-3 leading-7 text-slate-600">Development uses Codex CLI through CognitioLabs' gateway with gpt-5.6-terra. Natural-language search uses text-embedding-3-small through the backend; grounded Q&amp;A gives all 16 listing records to gpt-4o-mini through the same server-side gateway.</p>
-    </section>
-    <section class="rounded-3xl border border-stone-200 bg-white p-6">
-      <h2 class="font-display text-2xl font-bold">Known limitations</h2>
-      <p class="mt-3 leading-7 text-slate-600">Catalogue content is illustrative, category artwork is reused, and semantic search ranks only this small fixed catalogue. Q&amp;A sees all 16 listings but cannot answer facts those seeded records do not contain.</p>
-    </section>
+      <dl class="mt-10 grid max-w-4xl gap-px overflow-hidden rounded-2xl border border-slate-700 bg-slate-700 sm:grid-cols-3">
+        <div class="bg-slate-900 px-5 py-4">
+          <dt class="text-xs font-bold uppercase tracking-wider text-slate-400">Catalogue</dt>
+          <dd class="mt-1 font-display text-xl font-bold">16 seeded listings</dd>
+        </div>
+        <div class="bg-slate-900 px-5 py-4">
+          <dt class="text-xs font-bold uppercase tracking-wider text-slate-400">Access</dt>
+          <dd class="mt-1 font-display text-xl font-bold">Public, no sign-in</dd>
+        </div>
+        <div class="bg-slate-900 px-5 py-4">
+          <dt class="text-xs font-bold uppercase tracking-wider text-slate-400">AI behavior</dt>
+          <dd class="mt-1 font-display text-xl font-bold">Real calls, no fallback</dd>
+        </div>
+      </dl>
+    </div>
+  </section>
+
+  <div class="mx-auto grid max-w-7xl gap-10 px-5 py-12 sm:px-8 sm:py-16 lg:grid-cols-[15rem_minmax(0,1fr)] lg:gap-16">
+    <aside class="lg:sticky lg:top-6 lg:self-start" aria-label="On this page">
+      <p class="text-xs font-bold uppercase tracking-[0.18em] text-orange-700">Five questions, answered</p>
+      <nav class="mt-4 border-l border-stone-300" aria-label="Build notes sections">
+        <a href="#built-for" class="block border-l-2 border-transparent py-2 pl-4 text-sm font-semibold text-slate-600 transition hover:border-orange-500 hover:text-slate-950">1. Built and audience</a>
+        <a href="#seeded-limited" class="block border-l-2 border-transparent py-2 pl-4 text-sm font-semibold text-slate-600 transition hover:border-orange-500 hover:text-slate-950">2. Seeded and limited</a>
+        <a href="#ai-tools" class="block border-l-2 border-transparent py-2 pl-4 text-sm font-semibold text-slate-600 transition hover:border-orange-500 hover:text-slate-950">3. AI tools and models</a>
+        <a href="#excluded" class="block border-l-2 border-transparent py-2 pl-4 text-sm font-semibold text-slate-600 transition hover:border-orange-500 hover:text-slate-950">4. Deliberate exclusions</a>
+        <a href="#known-issues" class="block border-l-2 border-transparent py-2 pl-4 text-sm font-semibold text-slate-600 transition hover:border-orange-500 hover:text-slate-950">5. Known issues</a>
+      </nav>
+    </aside>
+
+    <div class="min-w-0 space-y-8">
+      <section id="built-for" class="scroll-mt-6 rounded-3xl border border-stone-200 bg-white p-6 shadow-sm shadow-slate-950/5 sm:p-9" aria-labelledby="built-for-heading">
+        <div class="flex items-start gap-4">
+          <span class="grid h-10 w-10 flex-none place-items-center rounded-full bg-orange-100 font-display text-sm font-bold text-orange-800" aria-hidden="true">01</span>
+          <div>
+            <p class="text-xs font-bold uppercase tracking-[0.16em] text-orange-700">What was built, and for whom</p>
+            <h2 id="built-for-heading" class="mt-2 font-display text-3xl font-bold tracking-tight">A focused discovery flow for makers</h2>
+          </div>
+        </div>
+
+        <div class="mt-6 space-y-4 leading-7 text-slate-600">
+          <p>
+            Maker Swap is a public, mobile-responsive second-hand marketplace demo for makers and hobbyists in Singapore: people looking for equipment for 3D printing, electronics, music, art and workshop projects without buying everything new. It was built for the CognitioLabs Associate Forward Deployed Engineer assessment, so the goal is to demonstrate a coherent end-to-end product rather than imitate a production marketplace.
+          </p>
+          <p>
+            A visitor can browse all five categories, filter the catalogue, open a full item detail page, describe a need in natural language, and ask follow-up questions in the floating catalogue assistant. The entire browse-to-detail flow is available without an account, and the reviewer does not need to supply an AI key.
+          </p>
+          <p>
+            The application is one FastAPI service on Render. FastAPI reads the catalogue into memory and serves Jinja2 HTML directly; Tailwind CSS is loaded from its CDN. There is no React application, Node build, separate front-end deployment or database. That deliberately small stack left more of the 72-hour window for search relevance, grounded answers and the user-facing flow.
+          </p>
+        </div>
+      </section>
+
+      <section id="seeded-limited" class="scroll-mt-6 rounded-3xl border border-stone-200 bg-white p-6 shadow-sm shadow-slate-950/5 sm:p-9" aria-labelledby="seeded-limited-heading">
+        <div class="flex items-start gap-4">
+          <span class="grid h-10 w-10 flex-none place-items-center rounded-full bg-orange-100 font-display text-sm font-bold text-orange-800" aria-hidden="true">02</span>
+          <div>
+            <p class="text-xs font-bold uppercase tracking-[0.16em] text-orange-700">What is seeded, simulated or limited</p>
+            <h2 id="seeded-limited-heading" class="mt-2 font-display text-3xl font-bold tracking-tight">A fixed demonstration catalogue</h2>
+          </div>
+        </div>
+
+        <ul class="mt-6 grid gap-4 text-sm leading-6 text-slate-600 sm:grid-cols-2">
+          <li class="rounded-2xl bg-stone-50 p-5">
+            <strong class="block text-base text-slate-950">Every listing is seeded</strong>
+            <span class="mt-1 block">The 16 IDs, titles, Singapore-dollar prices, categories, conditions, descriptions, pickup areas and discovery tags are authored demo data. They are not seller submissions or live stock.</span>
+          </li>
+          <li class="rounded-2xl bg-stone-50 p-5">
+            <strong class="block text-base text-slate-950">Artwork is representative</strong>
+            <span class="mt-1 block">Each category uses a local reusable SVG illustration. These are reliable demo assets, not photographs of the individual items.</span>
+          </li>
+          <li class="rounded-2xl bg-stone-50 p-5">
+            <strong class="block text-base text-slate-950">Pickup areas are display text</strong>
+            <span class="mt-1 block">Areas such as Jurong East or Bedok add realistic browsing context; they do not identify real sellers or expose precise live locations.</span>
+          </li>
+          <li class="rounded-2xl bg-stone-50 p-5">
+            <strong class="block text-base text-slate-950">There is no persistent inventory</strong>
+            <span class="mt-1 block">A strict Pydantic schema validates the JSON catalogue when it loads. It then lives in server memory, so changing a listing requires editing the seed data and redeploying.</span>
+          </li>
+          <li class="rounded-2xl bg-stone-50 p-5 sm:col-span-2">
+            <strong class="block text-base text-slate-950">Conversation memory is intentionally small</strong>
+            <span class="mt-1 block">Q&amp;A is stateless on the server. A bounded transcript is kept in the current tab's session storage so it survives page navigation, but it is not an account history and does not sync across tabs, browsers or devices.</span>
+          </li>
+        </ul>
+      </section>
+
+      <section id="ai-tools" class="scroll-mt-6 rounded-3xl border border-stone-200 bg-white p-6 shadow-sm shadow-slate-950/5 sm:p-9" aria-labelledby="ai-tools-heading">
+        <div class="flex items-start gap-4">
+          <span class="grid h-10 w-10 flex-none place-items-center rounded-full bg-orange-100 font-display text-sm font-bold text-orange-800" aria-hidden="true">03</span>
+          <div>
+            <p class="text-xs font-bold uppercase tracking-[0.16em] text-orange-700">Which AI tools and models were used</p>
+            <h2 id="ai-tools-heading" class="mt-2 font-display text-3xl font-bold tracking-tight">Real model calls, made server-side</h2>
+          </div>
+        </div>
+
+        <div class="mt-6 space-y-4">
+          <article class="rounded-2xl border border-stone-200 p-5 sm:p-6">
+            <div class="flex flex-wrap items-center justify-between gap-2">
+              <h3 class="font-display text-xl font-bold">Coding assistance</h3>
+              <code class="rounded-full bg-slate-100 px-3 py-1 text-xs font-bold text-slate-700">gpt-5.6-terra</code>
+            </div>
+            <p class="mt-3 leading-7 text-slate-600">Development used Codex CLI through CognitioLabs' coding-assistance gateway. It helped inspect, implement and test the project; it is not called by the deployed application.</p>
+          </article>
+
+          <article class="rounded-2xl border border-stone-200 p-5 sm:p-6">
+            <div class="flex flex-wrap items-center justify-between gap-2">
+              <h3 class="font-display text-xl font-bold">Natural-language search</h3>
+              <code class="rounded-full bg-slate-100 px-3 py-1 text-xs font-bold text-slate-700">openai/text-embedding-3-small</code>
+            </div>
+            <p class="mt-3 leading-7 text-slate-600">
+              The FastAPI backend uses the OpenAI Python SDK against CognitioLabs' OpenRouter-compatible gateway. It batches and caches two embeddings per listing: one for full structured details and one focused on title, category and discovery tags. Every submitted query is embedded by the real model, compared with both views using cosine similarity, filtered at a 0.35 relevance floor, and limited to the strongest four listings.
+            </p>
+            <p class="mt-3 leading-7 text-slate-600">
+              Exact normalized title and category phrases are promoted ahead of thresholded semantic matches so short searches such as a category name remain dependable. This is a small ranking rule layered onto model embeddings, not a keyword-only fallback: if the embedding call fails, search reports the failure instead of manufacturing results.
+            </p>
+          </article>
+
+          <article class="rounded-2xl border border-stone-200 p-5 sm:p-6">
+            <div class="flex flex-wrap items-center justify-between gap-2">
+              <h3 class="font-display text-xl font-bold">Catalogue Q&amp;A</h3>
+              <code class="rounded-full bg-slate-100 px-3 py-1 text-xs font-bold text-slate-700">openai/gpt-4o-mini</code>
+            </div>
+            <p class="mt-3 leading-7 text-slate-600">
+              The backend sends all 16 validated listing records to the chat model as structured context. Full context was chosen after a top-four retrieval version made broad questions fail. The system prompt tells the model to treat listings as untrusted data rather than instructions, use no outside facts, and say "I don't know based on the Maker Swap catalogue" when the records are insufficient.
+            </p>
+            <p class="mt-3 leading-7 text-slate-600">
+              The model returns a JSON answer plus up to four directly referenced listing IDs. The server validates those IDs against the real catalogue before the browser renders item links; broad summaries and unknown answers deliberately receive no generic product link.
+            </p>
+          </article>
+        </div>
+
+        <div class="mt-5 rounded-2xl border border-emerald-200 bg-emerald-50 p-5 text-sm leading-6 text-emerald-950">
+          <strong>Credential boundary:</strong> both customer-facing AI features call the gateway only from FastAPI. The browser calls Maker Swap's own API routes and never receives the server credential. Provider errors and timeouts are shown as errors; there is no canned AI-style fallback.
+        </div>
+      </section>
+
+      <section id="excluded" class="scroll-mt-6 rounded-3xl border border-stone-200 bg-white p-6 shadow-sm shadow-slate-950/5 sm:p-9" aria-labelledby="excluded-heading">
+        <div class="flex items-start gap-4">
+          <span class="grid h-10 w-10 flex-none place-items-center rounded-full bg-orange-100 font-display text-sm font-bold text-orange-800" aria-hidden="true">04</span>
+          <div>
+            <p class="text-xs font-bold uppercase tracking-[0.16em] text-orange-700">What was deliberately excluded, and why</p>
+            <h2 id="excluded-heading" class="mt-2 font-display text-3xl font-bold tracking-tight">Discovery was the product boundary</h2>
+          </div>
+        </div>
+
+        <div class="mt-6 overflow-hidden rounded-2xl border border-stone-200">
+          <div class="grid gap-2 border-b border-stone-200 bg-stone-50 p-5 sm:grid-cols-[12rem_1fr] sm:gap-6">
+            <h3 class="font-bold text-slate-950">Accounts and authentication</h3>
+            <p class="text-sm leading-6 text-slate-600">No login, saved profile or real seller identity. Public access is part of the assessment bar, and identity infrastructure would not improve the browse, search or Q&amp;A demonstration.</p>
+          </div>
+          <div class="grid gap-2 border-b border-stone-200 p-5 sm:grid-cols-[12rem_1fr] sm:gap-6">
+            <h3 class="font-bold text-slate-950">Payments and checkout</h3>
+            <p class="text-sm leading-6 text-slate-600">No cart, payment processor or order state. A fake checkout would imply a transaction capability that does not exist, while real payment work is explicitly outside the brief.</p>
+          </div>
+          <div class="grid gap-2 border-b border-stone-200 bg-stone-50 p-5 sm:grid-cols-[12rem_1fr] sm:gap-6">
+            <h3 class="font-bold text-slate-950">Messaging and logistics</h3>
+            <p class="text-sm leading-6 text-slate-600">No buyer-seller chat, shipping quote, delivery tracking or pickup coordination. There are no real sellers or fulfilment operations behind the seeded listings.</p>
+          </div>
+          <div class="grid gap-2 p-5 sm:grid-cols-[12rem_1fr] sm:gap-6">
+            <h3 class="font-bold text-slate-950">Database and admin tools</h3>
+            <p class="text-sm leading-6 text-slate-600">No listing editor, seller dashboard or multi-vendor system. JSON plus memory is enough for 16 fixed records and avoids spending the assessment window on operations the reviewer cannot meaningfully exercise.</p>
+          </div>
+        </div>
+      </section>
+
+      <section id="known-issues" class="scroll-mt-6 rounded-3xl border border-amber-200 bg-amber-50 p-6 shadow-sm shadow-amber-950/5 sm:p-9" aria-labelledby="known-issues-heading">
+        <div class="flex items-start gap-4">
+          <span class="grid h-10 w-10 flex-none place-items-center rounded-full bg-amber-200 font-display text-sm font-bold text-amber-950" aria-hidden="true">05</span>
+          <div>
+            <p class="text-xs font-bold uppercase tracking-[0.16em] text-amber-800">Known issues and unfinished parts</p>
+            <h2 id="known-issues-heading" class="mt-2 font-display text-3xl font-bold tracking-tight">What I would improve next</h2>
+          </div>
+        </div>
+
+        <ul class="mt-6 space-y-4 leading-7 text-slate-700">
+          <li class="border-l-2 border-amber-400 pl-4">
+            <strong class="text-slate-950">"Art tools" has one over-broad result.</strong> It returns the three relevant Art &amp; Craft listings plus one Workshop Tools listing because the word "tools" creates semantic overlap. Field weighting or simple query-intent parsing was deferred rather than lowering the global relevance floor and making unrelated searches worse.
+          </li>
+          <li class="border-l-2 border-amber-400 pl-4">
+            <strong class="text-slate-950">Budget language is approximate.</strong> Embeddings do not reliably translate words such as "cheap" or "budget-friendly" into a numeric price constraint. Explicit price parsing and filtering is unfinished, so a semantically relevant result is not guaranteed to be the cheapest match.
+          </li>
+          <li class="border-l-2 border-amber-400 pl-4">
+            <strong class="text-slate-950">Search tuning is catalogue-specific.</strong> The 0.35 floor separated tested unrelated probes (which peaked around 0.31) from weaker valid matches (which began around 0.36), but it is an empirical boundary for these 16 records, not a general marketplace ranking system.
+          </li>
+          <li class="border-l-2 border-amber-400 pl-4">
+            <strong class="text-slate-950">The first search after a server restart does more work.</strong> Listing embeddings are cached only in the FastAPI process, so a restart clears them and the next search must embed both listing views again before later searches can reuse the cache.
+          </li>
+          <li class="border-l-2 border-amber-400 pl-4">
+            <strong class="text-slate-950">Q&amp;A cannot know what the seeds do not say.</strong> It has no evidence for warranties, policies, seller details, exact availability beyond the current demo records, or facts outside the catalogue. Refusing those questions is intended behavior, not hidden completion.
+          </li>
+          <li class="border-l-2 border-amber-400 pl-4">
+            <strong class="text-slate-950">This stops before a transaction.</strong> Browse, detail, search and catalogue Q&amp;A are implemented; contacting a seller, reserving an item, paying and arranging delivery remain deliberately unbuilt. The demo should not be mistaken for a production marketplace.
+          </li>
+        </ul>
+      </section>
+
+      <div class="flex flex-col gap-4 rounded-3xl bg-slate-950 p-6 text-white sm:flex-row sm:items-center sm:justify-between sm:p-8">
+        <div>
+          <p class="font-display text-2xl font-bold">See the implemented flow</p>
+          <p class="mt-1 text-sm leading-6 text-slate-300">Browse the seeds, try a sentence in search, then ask the catalogue something it cannot know.</p>
+        </div>
+        <a href="{{ url_for('home') }}#listings" class="inline-flex flex-none justify-center rounded-full bg-orange-500 px-6 py-3 text-sm font-bold text-slate-950 transition hover:bg-orange-400">Browse the catalogue</a>
+      </div>
+    </div>
   </div>
-
-  <a href="{{ url_for('home') }}#listings" class="mt-10 inline-flex rounded-full bg-slate-950 px-6 py-3 text-sm font-bold text-white transition hover:bg-orange-600">Browse the catalogue</a>
 </main>
 {% endblock %}

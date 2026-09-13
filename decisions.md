@@ -26,3 +26,5 @@
 - [Phase 4] Fix the full-context linking regression by having gpt-4o-mini return up to four directly referenced listing IDs and validating them server-side - specific answers regain item links, while broad and unknown answers avoid a misleading generic catalogue link.
 - [Phase 4] Surface AI-provider failures as explicit widget errors with no canned answer - preserves the assessment's real-AI requirement when a model call fails.
 - [Phase 1] Exclude the supplied assessment PDF from Git history - it is reference material, not public application source.
+- [Phase 5] Structure `/notes` around the brief's five required questions and document the effective, superseding Phase 3 and Phase 4 designs - reviewers should not have to reconstruct the final behavior from the development history.
+- [Phase 5] Name the two accepted search precision issues, in-memory embedding cache, session-only Q&A history, seeded catalogue boundaries and deliberately excluded transaction scope - the assessment should present limitations as plainly as completed features.

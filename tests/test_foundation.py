@@ -26,6 +26,14 @@ def test_notes_page_is_real_and_truthful() -> None:
 
     assert response.status_code == 200
     assert "What this demo is - and is not." in response.text
-    assert "The 16 listings" in response.text
-    assert "text-embedding-3-small" in response.text
-    assert "grounded Q&amp;A gives all 16 listing records to gpt-4o-mini" in response.text
+    assert 'id="built-for"' in response.text
+    assert 'id="seeded-limited"' in response.text
+    assert 'id="ai-tools"' in response.text
+    assert 'id="excluded"' in response.text
+    assert 'id="known-issues"' in response.text
+    assert "16 seeded listings" in response.text
+    assert "openai/text-embedding-3-small" in response.text
+    assert "openai/gpt-4o-mini" in response.text
+    assert "gpt-5.6-terra" in response.text
+    assert "Budget language is approximate." in response.text
+    assert "CLASSGW_KEY" not in response.text
