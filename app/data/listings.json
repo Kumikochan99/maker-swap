@@ -5,10 +5,21 @@
     "price": 420,
     "category": "3D Printing",
     "condition": "Good",
-    "description": "A compact, dependable printer with the removable spring-steel sheet and original power supply. Calibrated recently and producing clean PLA and PETG parts.",
+    "status": "Available",
+    "description": "A compact, dependable printer with the removable spring-steel sheet and original power supply. Calibrated recently and producing clean PLA and PETG parts. The small footprint suits a study desk or first home workshop.",
     "image": "/static/images/3d-printing.svg",
+    "images": [
+      "/static/images/3d-printing.svg",
+      "/static/images/3d-printing-detail.svg",
+      "/static/images/3d-printing-materials.svg"
+    ],
     "pickup_area": "Jurong East",
-    "tags": ["beginner friendly", "PLA", "PETG", "compact"]
+    "tags": ["beginner friendly", "PLA", "PETG", "compact", "FDM", "removable build sheet"],
+    "specs": [
+      {"label": "Build volume", "value": "180 x 180 x 180 mm"},
+      {"label": "Materials", "value": "PLA and PETG tested"},
+      {"label": "Included", "value": "Spring-steel sheet and original power supply"}
+    ]
   },
   {
     "id": "bambu-lab-a1-mini",
@@ -16,10 +27,21 @@
     "price": 380,
     "category": "3D Printing",
     "condition": "Like new",
-    "description": "Fast desktop printer with automatic calibration and fewer than 80 print hours. Includes the stock build plate, spare nozzle and unopened sample filament.",
+    "status": "Reserved",
+    "description": "Fast desktop printer with automatic calibration and fewer than 80 print hours. Includes the stock build plate, spare nozzle and unopened sample filament. Reserved for a buyer while pickup is being arranged.",
     "image": "/static/images/3d-printing.svg",
+    "images": [
+      "/static/images/3d-printing.svg",
+      "/static/images/3d-printing-detail.svg",
+      "/static/images/3d-printing-materials.svg"
+    ],
     "pickup_area": "Queenstown",
-    "tags": ["fast printing", "automatic calibration", "small workspace"]
+    "tags": ["fast printing", "automatic calibration", "small workspace", "FDM", "spare nozzle", "reserved"],
+    "specs": [
+      {"label": "Build volume", "value": "180 x 180 x 180 mm"},
+      {"label": "Print time", "value": "Fewer than 80 hours"},
+      {"label": "Included", "value": "Build plate, spare nozzle and sample filament"}
+    ]
   },
   {
     "id": "creality-ender-3-s1",
@@ -27,10 +49,21 @@
     "price": 210,
     "category": "3D Printing",
     "condition": "Good",
-    "description": "Direct-drive printer suited to flexible filament and everyday prototyping. The bed has minor cosmetic marks but remains flat and reliable.",
+    "status": "Available",
+    "description": "Direct-drive printer suited to flexible filament and everyday prototyping. The bed has minor cosmetic marks but remains flat and reliable. Manual levelling and extrusion were checked after its last print.",
     "image": "/static/images/3d-printing.svg",
+    "images": [
+      "/static/images/3d-printing.svg",
+      "/static/images/3d-printing-detail.svg",
+      "/static/images/3d-printing-materials.svg"
+    ],
     "pickup_area": "Tampines",
-    "tags": ["direct drive", "TPU", "modifiable", "prototyping"]
+    "tags": ["direct drive", "TPU", "modifiable", "prototyping", "FDM", "flexible filament"],
+    "specs": [
+      {"label": "Build volume", "value": "220 x 220 x 270 mm"},
+      {"label": "Extruder", "value": "Direct drive"},
+      {"label": "Materials", "value": "PLA and flexible TPU tested"}
+    ]
   },
   {
     "id": "pla-filament-bundle",
@@ -38,10 +71,21 @@
     "price": 38,
     "category": "3D Printing",
     "condition": "New in box",
-    "description": "Four sealed 500 g spools in terracotta, forest green, cream and charcoal. Standard 1.75 mm diameter for most hobby printers.",
+    "status": "Available",
+    "description": "Four sealed 500 g spools in terracotta, forest green, cream and charcoal. Standard 1.75 mm diameter for most hobby printers. Each spool remains vacuum-packed with its desiccant sachet.",
     "image": "/static/images/3d-printing.svg",
+    "images": [
+      "/static/images/3d-printing.svg",
+      "/static/images/3d-printing-materials.svg",
+      "/static/images/3d-printing-detail.svg"
+    ],
     "pickup_area": "Clementi",
-    "tags": ["1.75 mm", "four colours", "sealed", "PLA"]
+    "tags": ["1.75 mm", "four colours", "sealed", "PLA", "2 kg total", "vacuum packed"],
+    "specs": [
+      {"label": "Diameter", "value": "1.75 mm"},
+      {"label": "Total weight", "value": "2 kg across four 500 g spools"},
+      {"label": "Colours", "value": "Terracotta, forest green, cream and charcoal"}
+    ]
   },
   {
     "id": "hakko-fx888d-station",
@@ -49,10 +93,21 @@
     "price": 115,
     "category": "Electronics",
     "condition": "Excellent",
-    "description": "Temperature-controlled soldering station with stand, brass wool and three genuine Hakko tips. Heats quickly and holds temperature steadily.",
+    "status": "Available",
+    "description": "Temperature-controlled soldering station with stand, brass wool and three genuine Hakko tips. Heats quickly and holds temperature steadily. The display, controls and tip collar were checked before listing.",
     "image": "/static/images/electronics.svg",
+    "images": [
+      "/static/images/electronics.svg",
+      "/static/images/electronics-detail.svg",
+      "/static/images/electronics-components.svg"
+    ],
     "pickup_area": "Toa Payoh",
-    "tags": ["temperature controlled", "three tips", "repair", "electronics"]
+    "tags": ["temperature controlled", "three tips", "repair", "electronics", "soldering", "bench tool"],
+    "specs": [
+      {"label": "Power", "value": "70 W"},
+      {"label": "Temperature range", "value": "50-480 C"},
+      {"label": "Included", "value": "Stand, brass wool and three genuine tips"}
+    ]
   },
   {
     "id": "arduino-sensor-starter-kit",
@@ -60,10 +115,21 @@
     "price": 45,
     "category": "Electronics",
     "condition": "Good",
-    "description": "An Arduino Uno-compatible board with breadboards, jumper wires, resistors and 18 labelled sensor modules. All modules were checked before packing.",
+    "status": "Sold",
+    "description": "An Arduino Uno-compatible board with breadboards, jumper wires, resistors and 18 labelled sensor modules. All modules were checked before packing. This starter set has sold and remains visible as seeded catalogue history.",
     "image": "/static/images/electronics.svg",
+    "images": [
+      "/static/images/electronics.svg",
+      "/static/images/electronics-components.svg",
+      "/static/images/electronics-detail.svg"
+    ],
     "pickup_area": "Kent Ridge",
-    "tags": ["Arduino", "sensors", "learning", "prototyping"]
+    "tags": ["Arduino", "sensors", "learning", "prototyping", "breadboard", "sold"],
+    "specs": [
+      {"label": "Controller", "value": "Arduino Uno-compatible board"},
+      {"label": "Modules", "value": "18 labelled sensors"},
+      {"label": "Included", "value": "Breadboards, jumper wires and resistors"}
+    ]
   },
   {
     "id": "rigol-ds1054z-oscilloscope",
@@ -71,10 +137,21 @@
     "price": 320,
     "category": "Electronics",
     "condition": "Good",
-    "description": "Four-channel 50 MHz digital oscilloscope with two probes and power lead. The screen is clear; the case has light workshop scuffs.",
+    "status": "Available",
+    "description": "Four-channel 50 MHz digital oscilloscope with two probes and power lead. The screen is clear; the case has light workshop scuffs. All four channels and front-panel controls respond normally.",
     "image": "/static/images/electronics.svg",
+    "images": [
+      "/static/images/electronics.svg",
+      "/static/images/electronics-detail.svg",
+      "/static/images/electronics-components.svg"
+    ],
     "pickup_area": "Woodlands",
-    "tags": ["four channel", "50 MHz", "debugging", "test equipment"]
+    "tags": ["four channel", "50 MHz", "debugging", "test equipment", "two probes", "bench instrument"],
+    "specs": [
+      {"label": "Channels", "value": "4"},
+      {"label": "Bandwidth", "value": "50 MHz"},
+      {"label": "Included", "value": "Two probes and power lead"}
+    ]
   },
   {
     "id": "raspberry-pi-4-workbench",
@@ -82,10 +159,21 @@
     "price": 95,
     "category": "Electronics",
     "condition": "Excellent",
-    "description": "Raspberry Pi 4 with 4 GB RAM, official power supply, ventilated case, 64 GB microSD card and a compact wireless keyboard.",
+    "status": "Available",
+    "description": "Raspberry Pi 4 with 4 GB RAM, official power supply, ventilated case, 64 GB microSD card and a compact wireless keyboard. The card has been wiped and is ready for a fresh operating-system image.",
     "image": "/static/images/electronics.svg",
+    "images": [
+      "/static/images/electronics.svg",
+      "/static/images/electronics-components.svg",
+      "/static/images/electronics-detail.svg"
+    ],
     "pickup_area": "Bishan",
-    "tags": ["single-board computer", "4 GB", "home server", "coding"]
+    "tags": ["single-board computer", "4 GB", "home server", "coding", "64 GB", "wireless keyboard"],
+    "specs": [
+      {"label": "Memory", "value": "4 GB RAM"},
+      {"label": "Storage", "value": "64 GB microSD card"},
+      {"label": "Included", "value": "Official power supply, case and wireless keyboard"}
+    ]
   },
   {
     "id": "yamaha-pacifica-112v",
@@ -93,10 +181,21 @@
     "price": 280,
     "category": "Instruments",
     "condition": "Good",
-    "description": "Versatile sunburst electric guitar with a fresh setup, comfortable action and clean electronics. Includes a padded gig bag and strap.",
+    "status": "Available",
+    "description": "Versatile sunburst electric guitar with a fresh setup, comfortable action and clean electronics. Includes a padded gig bag and strap. Frets show light normal wear with no buzzing during the latest check.",
     "image": "/static/images/instruments.svg",
+    "images": [
+      "/static/images/instruments.svg",
+      "/static/images/instruments-detail.svg",
+      "/static/images/instruments-accessories.svg"
+    ],
     "pickup_area": "Serangoon",
-    "tags": ["electric guitar", "gig bag", "beginner friendly", "fresh setup"]
+    "tags": ["electric guitar", "gig bag", "beginner friendly", "fresh setup", "HSS pickups", "sunburst"],
+    "specs": [
+      {"label": "Pickup layout", "value": "HSS"},
+      {"label": "Finish", "value": "Sunburst"},
+      {"label": "Included", "value": "Padded gig bag and strap"}
+    ]
   },
   {
     "id": "roland-fp-10-keyboard",
@@ -104,10 +203,21 @@
     "price": 420,
     "category": "Instruments",
     "condition": "Like new",
-    "description": "Weighted 88-key digital piano with pedal, music rest and folding stand. Purchased for lessons and used gently in a smoke-free home.",
+    "status": "Available",
+    "description": "Weighted 88-key digital piano with pedal, music rest and folding stand. Purchased for lessons and used gently in a smoke-free home. Headphone output and every key were checked before listing.",
     "image": "/static/images/instruments.svg",
+    "images": [
+      "/static/images/instruments.svg",
+      "/static/images/instruments-detail.svg",
+      "/static/images/instruments-accessories.svg"
+    ],
     "pickup_area": "Punggol",
-    "tags": ["88 keys", "weighted action", "headphone practice", "piano"]
+    "tags": ["88 keys", "weighted action", "headphone practice", "piano", "lesson setup", "folding stand"],
+    "specs": [
+      {"label": "Keyboard", "value": "88 weighted keys"},
+      {"label": "Practice", "value": "Headphone output checked"},
+      {"label": "Included", "value": "Pedal, music rest and folding stand"}
+    ]
   },
   {
     "id": "mahogany-concert-ukulele",
@@ -115,10 +225,21 @@
     "price": 90,
     "category": "Instruments",
     "condition": "Good",
-    "description": "Warm-sounding solid-top concert ukulele with geared tuners. Comes with a hard case, clip-on tuner and spare string set.",
+    "status": "Available",
+    "description": "Warm-sounding solid-top concert ukulele with geared tuners. Comes with a hard case, clip-on tuner and spare string set. The neck is straight and the current strings hold tuning well.",
     "image": "/static/images/instruments.svg",
+    "images": [
+      "/static/images/instruments.svg",
+      "/static/images/instruments-detail.svg",
+      "/static/images/instruments-accessories.svg"
+    ],
     "pickup_area": "Bedok",
-    "tags": ["concert size", "hard case", "portable", "acoustic"]
+    "tags": ["concert size", "hard case", "portable", "acoustic", "clip-on tuner", "spare strings"],
+    "specs": [
+      {"label": "Size", "value": "Concert"},
+      {"label": "Top", "value": "Solid mahogany"},
+      {"label": "Included", "value": "Hard case, clip-on tuner and spare strings"}
+    ]
   },
   {
     "id": "watercolour-studio-set",
@@ -126,10 +247,21 @@
     "price": 55,
     "category": "Art & Craft",
     "condition": "Excellent",
-    "description": "Winsor & Newton half-pan set with cold-press paper, masking fluid and six synthetic brushes. Only a few colours have been lightly used.",
+    "status": "Available",
+    "description": "Winsor & Newton half-pan set with cold-press paper, masking fluid and six synthetic brushes. Only a few colours have been lightly used. The case closes securely and the remaining materials are clean.",
     "image": "/static/images/art-craft.svg",
+    "images": [
+      "/static/images/art-craft.svg",
+      "/static/images/art-craft-detail.svg",
+      "/static/images/art-craft-materials.svg"
+    ],
     "pickup_area": "Bugis",
-    "tags": ["watercolour", "brushes", "paper included", "portable"]
+    "tags": ["watercolour", "brushes", "paper included", "portable", "half pans", "masking fluid"],
+    "specs": [
+      {"label": "Paint format", "value": "Winsor & Newton half pans"},
+      {"label": "Paper", "value": "Cold-press sheets included"},
+      {"label": "Brushes", "value": "6 synthetic brushes"}
+    ]
   },
   {
     "id": "cricut-maker-3",
@@ -137,10 +269,21 @@
     "price": 390,
     "category": "Art & Craft",
     "condition": "Excellent",
-    "description": "Smart cutting machine with fine-point blade, rotary blade, two mats and a starter pack of vinyl. Tested and reset for a new owner.",
+    "status": "Reserved",
+    "description": "Smart cutting machine with fine-point blade, rotary blade, two mats and a starter pack of vinyl. Tested and reset for a new owner. Reserved while a buyer confirms collection timing.",
     "image": "/static/images/art-craft.svg",
+    "images": [
+      "/static/images/art-craft.svg",
+      "/static/images/art-craft-detail.svg",
+      "/static/images/art-craft-materials.svg"
+    ],
     "pickup_area": "Ang Mo Kio",
-    "tags": ["vinyl", "fabric", "paper craft", "cutting machine"]
+    "tags": ["vinyl", "fabric", "paper craft", "cutting machine", "two mats", "reserved"],
+    "specs": [
+      {"label": "Materials", "value": "Vinyl, fabric and paper"},
+      {"label": "Blades", "value": "Fine-point and rotary"},
+      {"label": "Included", "value": "Two mats and starter vinyl pack"}
+    ]
   },
   {
     "id": "tabletop-lino-press",
@@ -148,10 +291,21 @@
     "price": 160,
     "category": "Art & Craft",
     "condition": "Good",
-    "description": "Compact A4 lever press for lino and small relief prints. Includes a glass inking plate, roller and a starter set of carving tools.",
+    "status": "Available",
+    "description": "Compact A4 lever press for lino and small relief prints. Includes a glass inking plate, roller and a starter set of carving tools. The platen closes evenly and the lever moves smoothly.",
     "image": "/static/images/art-craft.svg",
+    "images": [
+      "/static/images/art-craft.svg",
+      "/static/images/art-craft-detail.svg",
+      "/static/images/art-craft-materials.svg"
+    ],
     "pickup_area": "Geylang",
-    "tags": ["printmaking", "A4", "lino", "hand press"]
+    "tags": ["printmaking", "A4", "lino", "hand press", "relief print", "carving tools"],
+    "specs": [
+      {"label": "Maximum print", "value": "A4"},
+      {"label": "Mechanism", "value": "Tabletop lever press"},
+      {"label": "Included", "value": "Glass plate, roller and carving tools"}
+    ]
   },
   {
     "id": "makita-cordless-drill-set",
@@ -159,10 +313,21 @@
     "price": 145,
     "category": "Workshop Tools",
     "condition": "Good",
-    "description": "Reliable 18 V drill-driver with two batteries, charger and hard case. Both batteries hold charge well for weekend projects.",
+    "status": "Available",
+    "description": "Reliable 18 V drill-driver with two batteries, charger and hard case. Both batteries hold charge well for weekend projects. The chuck, trigger and two-speed selector were checked before listing.",
     "image": "/static/images/workshop-tools.svg",
+    "images": [
+      "/static/images/workshop-tools.svg",
+      "/static/images/workshop-tools-detail.svg",
+      "/static/images/workshop-tools-parts.svg"
+    ],
     "pickup_area": "Bukit Panjang",
-    "tags": ["18 V", "two batteries", "woodworking", "portable", "renovation", "DIY", "home improvement"]
+    "tags": ["18 V", "two batteries", "woodworking", "portable", "renovation", "DIY", "home improvement", "drill driver"],
+    "specs": [
+      {"label": "Voltage", "value": "18 V"},
+      {"label": "Batteries", "value": "2; both hold charge"},
+      {"label": "Included", "value": "Charger and hard case"}
+    ]
   },
   {
     "id": "bosch-router-table",
@@ -170,9 +335,20 @@
     "price": 210,
     "category": "Workshop Tools",
     "condition": "Fair",
-    "description": "Variable-speed palm router mounted in a compact benchtop table. Fully working with cosmetic wear, fence, collets and four common bits.",
+    "status": "Available",
+    "description": "Variable-speed palm router mounted in a compact benchtop table. Fully working with cosmetic wear, fence, collets and four common bits. The height adjustment and power switch operate correctly.",
     "image": "/static/images/workshop-tools.svg",
+    "images": [
+      "/static/images/workshop-tools.svg",
+      "/static/images/workshop-tools-detail.svg",
+      "/static/images/workshop-tools-parts.svg"
+    ],
     "pickup_area": "Yishun",
-    "tags": ["woodworking", "variable speed", "router bits", "benchtop", "renovation", "DIY", "home improvement"]
+    "tags": ["woodworking", "variable speed", "router bits", "benchtop", "renovation", "DIY", "home improvement", "palm router"],
+    "specs": [
+      {"label": "Format", "value": "Palm router with compact benchtop table"},
+      {"label": "Speed", "value": "Variable"},
+      {"label": "Included", "value": "Fence, collets and four common bits"}
+    ]
   }
 ]

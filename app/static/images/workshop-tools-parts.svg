@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" role="img" aria-labelledby="title">
+  <title id="title">Stylised tool batteries, router bits and workshop accessories</title>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#fffbeb"/><stop offset="1" stop-color="#fed7aa"/></linearGradient>
+    <filter id="shadow"><feDropShadow dx="0" dy="16" stdDeviation="15" flood-color="#0f172a" flood-opacity=".18"/></filter>
+  </defs>
+  <rect width="800" height="600" fill="url(#bg)"/>
+  <g filter="url(#shadow)">
+    <rect x="82" y="186" width="238" height="284" rx="34" fill="#0f172a"/>
+    <path d="M128 186v-62h146v62" fill="#334155"/>
+    <rect x="126" y="244" width="150" height="72" rx="16" fill="#047857"/>
+    <rect x="382" y="98" width="330" height="388" rx="34" fill="#fff"/>
+  </g>
+  <g fill="#64748b">
+    <path d="M430 160h42v230h-42z"/><path d="M500 132h42v258h-42z"/><path d="M570 178h42v212h-42z"/><path d="M640 112h30v278h-30z"/>
+  </g>
+  <g fill="#f97316">
+    <path d="M420 390h62l-16 74h-30z"/><path d="M490 390h62l-10 74h-42z"/><path d="M560 390h62l-22 74h-18z"/><path d="M628 390h54l-12 74h-30z"/>
+  </g>
+  <path d="M128 370h146" stroke="#f97316" stroke-width="18" stroke-linecap="round"/>
+</svg>

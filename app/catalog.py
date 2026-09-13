@@ -1,14 +1,30 @@
 import json
 from functools import lru_cache
 from pathlib import Path
-from typing import Literal
+from typing import Annotated, Literal
 
-from pydantic import BaseModel, ConfigDict, Field, TypeAdapter, ValidationError
+from pydantic import (
+    BaseModel,
+    ConfigDict,
+    Field,
+    TypeAdapter,
+    ValidationError,
+    model_validator,
+)
 
 
 DATA_PATH = Path(__file__).resolve().parent / "data" / "listings.json"
 
 Condition = Literal["New in box", "Like new", "Excellent", "Good", "Fair"]
+ListingStatus = Literal["Available", "Reserved", "Sold"]
+ImagePath = Annotated[str, Field(pattern=r"^/static/images/[a-z0-9-]+\.svg$")]
+
+
+class ListingSpec(BaseModel):
+    model_config = ConfigDict(frozen=True)
+
+    label: str = Field(min_length=2, max_length=40)
+    value: str = Field(min_length=1, max_length=120)
 
 
 class Listing(BaseModel):
@@ -19,10 +35,21 @@ class Listing(BaseModel):
     price: int = Field(gt=0, le=100_000)
     category: str = Field(min_length=2, max_length=50)
     condition: Condition
+    status: ListingStatus
     description: str = Field(min_length=20, max_length=1_000)
-    image: str = Field(pattern=r"^/static/images/[a-z0-9-]+\.svg$")
+    image: ImagePath
+    images: tuple[ImagePath, ...] = Field(min_length=2, max_length=4)
     pickup_area: str = Field(min_length=2, max_length=80)
-    tags: tuple[str, ...] = Field(min_length=1, max_length=8)
+    tags: tuple[str, ...] = Field(min_length=1, max_length=12)
+    specs: tuple[ListingSpec, ...] = Field(min_length=2, max_length=6)
+
+    @model_validator(mode="after")
+    def validate_gallery(self) -> "Listing":
+        if self.images[0] != self.image:
+            raise ValueError("The primary image must be the first gallery image.")
+        if len(self.images) != len(set(self.images)):
+            raise ValueError("Gallery image paths must be unique within a listing.")
+        return self
 
 
 class CatalogLoadError(RuntimeError):

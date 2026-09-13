@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" role="img" aria-labelledby="title">
+  <title id="title">Stylised collection of filament spools and printed samples</title>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#fff7ed"/><stop offset="1" stop-color="#fed7aa"/></linearGradient>
+    <filter id="shadow"><feDropShadow dx="0" dy="16" stdDeviation="14" flood-color="#0f172a" flood-opacity=".16"/></filter>
+  </defs>
+  <rect width="800" height="600" fill="url(#bg)"/>
+  <g filter="url(#shadow)">
+    <g transform="translate(90 135)"><circle cx="130" cy="150" r="126" fill="#c2410c"/><circle cx="130" cy="150" r="58" fill="#fff7ed"/><circle cx="130" cy="150" r="26" fill="#0f172a"/></g>
+    <g transform="translate(290 80)"><circle cx="130" cy="150" r="126" fill="#047857"/><circle cx="130" cy="150" r="58" fill="#fff7ed"/><circle cx="130" cy="150" r="26" fill="#0f172a"/></g>
+    <g transform="translate(490 150)"><circle cx="130" cy="150" r="126" fill="#334155"/><circle cx="130" cy="150" r="58" fill="#fff7ed"/><circle cx="130" cy="150" r="26" fill="#0f172a"/></g>
+  </g>
+  <path d="M210 450h380" stroke="#0f172a" stroke-width="20" stroke-linecap="round" opacity=".16"/>
+  <path d="M320 430h160l-24-76H344z" fill="#f97316"/>
+</svg>

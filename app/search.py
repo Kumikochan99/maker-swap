@@ -293,9 +293,12 @@ def listing_search_text(listing: Listing) -> str:
         f"title: {listing.title}",
         f"category: {listing.category}",
         f"condition: {listing.condition}",
+        f"status: {listing.status}",
         f"description: {listing.description}",
         f"pickup area: {listing.pickup_area}",
         f"tags: {', '.join(listing.tags)}",
+        "specifications: "
+        + "; ".join(f"{spec.label}: {spec.value}" for spec in listing.specs),
     )
     return normalize_text("\n".join(fields))
 
@@ -303,7 +306,7 @@ def listing_search_text(listing: Listing) -> str:
 def listing_discovery_text(listing: Listing) -> str:
     return normalize_text(
         f"{listing.title}. category: {listing.category}. "
-        f"useful for: {', '.join(listing.tags)}."
+        f"status: {listing.status}. useful for: {', '.join(listing.tags)}."
     )
 
 

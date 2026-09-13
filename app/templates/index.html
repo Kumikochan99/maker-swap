@@ -61,29 +61,24 @@
       </div>
     </div>
 
-    <div class="mt-12 flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+    <div class="mt-12">
       <div>
         <p class="text-sm font-bold uppercase tracking-[0.18em] text-slate-500">The workbench</p>
         <h2 id="catalogue-heading" class="mt-2 font-display text-3xl font-bold tracking-tight sm:text-4xl" tabindex="-1">
           {% if selected_category %}{{ selected_category }}{% else %}Browse everything{% endif %}
         </h2>
       </div>
-      <nav class="flex w-full max-w-full gap-2 overflow-x-auto pb-2 lg:w-auto" aria-label="Catalogue categories">
-        <a href="{{ url_for('home') }}#listings" class="category-pill {% if not selected_category %}category-pill-active{% endif %}">All</a>
-        {% for category in categories %}
-          <a href="{{ url_for('home') }}?category={{ category | urlencode }}#listings" class="category-pill {% if selected_category == category %}category-pill-active{% endif %}">
-            {{ category }}
-          </a>
-        {% endfor %}
-      </nav>
     </div>
 
     <div id="listing-grid" class="mt-9 grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 {% if not listings %}hidden{% endif %}" aria-live="off">
       {% if listings %}
         {% for listing in listings %}
-          <article data-listing-id="{{ listing.id }}" class="listing-card group overflow-hidden rounded-3xl border border-stone-200 bg-white">
-            <a href="{{ url_for('listing_detail', listing_id=listing.id) }}" class="block h-full" aria-label="View {{ listing.title }} for S${{ listing.price }}">
-              <div class="aspect-[4/3] overflow-hidden bg-stone-100">
+          <article data-listing-id="{{ listing.id }}" data-listing-status="{{ listing.status }}" class="listing-card group overflow-hidden rounded-3xl border border-stone-200 bg-white">
+            <a href="{{ url_for('listing_detail', listing_id=listing.id) }}" class="block h-full" aria-label="View {{ listing.title }} for S${{ listing.price }}{% if listing.status != 'Available' %}, status {{ listing.status }}{% endif %}">
+              <div class="relative aspect-[4/3] overflow-hidden bg-stone-100">
+                {% if listing.status != 'Available' %}
+                  <span class="listing-status-badge absolute left-4 top-4 z-10 rounded-full px-3 py-1.5 text-xs font-bold uppercase tracking-[0.12em] shadow-sm" data-status="{{ listing.status }}">{{ listing.status }}</span>
+                {% endif %}
                 <img src="{{ listing.image }}" alt="Illustration for {{ listing.title }}" class="h-full w-full object-cover transition duration-500 group-hover:scale-[1.04]" loading="lazy">
               </div>
               <div class="flex min-h-64 flex-col p-5">
@@ -111,9 +106,10 @@
     </div>
 
     <template id="listing-card-template">
-      <article data-listing-id class="listing-card group overflow-hidden rounded-3xl border border-stone-200 bg-white">
+      <article data-listing-id data-listing-status class="listing-card group overflow-hidden rounded-3xl border border-stone-200 bg-white">
         <a data-card-link href="#" class="block h-full">
-          <div class="aspect-[4/3] overflow-hidden bg-stone-100">
+          <div class="relative aspect-[4/3] overflow-hidden bg-stone-100">
+            <span data-card-status class="listing-status-badge absolute left-4 top-4 z-10 hidden rounded-full px-3 py-1.5 text-xs font-bold uppercase tracking-[0.12em] shadow-sm"></span>
             <img data-card-image src="" alt="" class="h-full w-full object-cover transition duration-500 group-hover:scale-[1.04]" loading="lazy">
           </div>
           <div class="flex min-h-64 flex-col p-5">
@@ -136,5 +132,5 @@
 {% endblock %}
 
 {% block scripts %}
-<script src="{{ url_for('static', path='/search.js') }}?v=phase3-reset-1" defer></script>
+<script src="{{ url_for('static', path='/search.js') }}?v=polish-status-1" defer></script>
 {% endblock %}

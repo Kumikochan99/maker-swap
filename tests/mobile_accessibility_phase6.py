@@ -163,6 +163,36 @@ def verify_keyboard_and_labels(page: Page) -> dict[str, object]:
     }
 
 
+def verify_glass_navigation(page: Page) -> dict[str, object]:
+    nav = page.locator(".site-glass-nav")
+    style = nav.evaluate(
+        """element => {
+            const style = getComputedStyle(element);
+            return {
+                background: style.backgroundColor,
+                backdrop: style.backdropFilter || style.webkitBackdropFilter,
+                position: getComputedStyle(element.closest('header')).position,
+            };
+        }"""
+    )
+    assert style["position"] == "fixed"
+    assert "rgba" in style["background"]
+    assert "blur" in style["backdrop"]
+
+    toggle = page.locator("#category-menu-toggle")
+    toggle.click()
+    expect(toggle).to_have_attribute("aria-expanded", "true")
+    panel = page.locator(".site-dropdown-panel")
+    panel_box = assert_inside_viewport(page, ".site-dropdown-panel")
+    expect(page.get_by_role("link", name="All Listings", exact=True)).to_be_visible()
+    expect(page.get_by_role("link", name="Art Supplies", exact=True)).to_be_visible()
+    page.keyboard.press("Escape")
+    expect(panel).to_be_hidden()
+    expect(toggle).to_be_focused()
+
+    return {"style": style, "panel": panel_box, "escape_returns_focus": True}
+
+
 def verify_viewport(
     browser: Browser,
     viewport: dict[str, int],
@@ -178,19 +208,26 @@ def verify_viewport(
     first_card_box = page.locator("#listing-grid > [data-listing-id]").first.bounding_box()
     assert first_card_box is not None and first_card_box["width"] <= viewport["width"]
 
+    glass_navigation = verify_glass_navigation(page)
+    page.goto(f"{BASE_URL}/", wait_until="networkidle")
     keyboard = verify_keyboard_and_labels(page)
     contrast = {
         "hero_heading": measured_contrast(page, ".hero-grid h1", ".hero-grid"),
         "search_input": measured_contrast(page, "#catalogue-search-query"),
         "search_button": measured_contrast(page, "#catalogue-search-submit"),
-        "category_link": measured_contrast(
-            page,
-            ".category-pill:not(.category-pill-active)",
-        ),
+        "nav_brand": measured_contrast(page, ".site-brand", ".site-glass-nav"),
         "footer_copy": measured_contrast(page, ".site-footer p", ".site-footer"),
         "chat_toggle": measured_contrast(page, "#catalogue-chat-toggle"),
     }
     assert all(ratio >= 4.5 for ratio in contrast.values())
+
+    reserved_card = page.locator('[data-listing-id="bambu-lab-a1-mini"]')
+    reserved_card.scroll_into_view_if_needed()
+    expect(reserved_card.locator('[data-status="Reserved"]')).to_be_visible()
+    page.screenshot(
+        path=ARTIFACT_DIR / f"browse-status-{viewport['width']}.png",
+        full_page=False,
+    )
 
     page.locator(".site-footer").scroll_into_view_if_needed()
     page.evaluate("window.scrollTo(0, document.body.scrollHeight)")
@@ -215,6 +252,9 @@ def verify_viewport(
     )
     assert_no_horizontal_page_overflow(page)
     expect(page.get_by_role("heading", name="Original Prusa MINI+")).to_be_visible()
+    expect(page.locator("[data-gallery-thumbnail]")).to_have_count(3)
+    page.locator("[data-gallery-next]").click()
+    expect(page.locator("[data-gallery-counter]")).to_have_text("2 / 3")
     page.screenshot(
         path=ARTIFACT_DIR / f"detail-{viewport['width']}.png",
         full_page=False,
@@ -243,6 +283,7 @@ def verify_viewport(
             "images_have_alt": True,
         },
         "keyboard": keyboard,
+        "glass_navigation": glass_navigation,
         "contrast_ratios": {
             name: round(ratio, 2) for name, ratio in contrast.items()
         },

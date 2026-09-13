@@ -1,3 +1,4 @@
+from collections import Counter
 from pathlib import Path
 
 from fastapi.testclient import TestClient
@@ -23,7 +24,19 @@ def test_seeded_catalog_is_valid_and_complete() -> None:
         "Instruments",
         "Workshop Tools",
     )
-    assert all((STATIC_DIR / listing.image.removeprefix("/static/")).is_file() for listing in listings)
+    assert Counter(listing.status for listing in listings) == {
+        "Available": 13,
+        "Reserved": 2,
+        "Sold": 1,
+    }
+    assert all(2 <= len(listing.images) <= 4 for listing in listings)
+    assert all(listing.images[0] == listing.image for listing in listings)
+    assert all(len(listing.specs) >= 2 for listing in listings)
+    assert all(
+        (STATIC_DIR / image.removeprefix("/static/")).is_file()
+        for listing in listings
+        for image in listing.images
+    )
 
 
 def test_browse_page_renders_every_listing() -> None:
@@ -37,7 +50,27 @@ def test_browse_page_renders_every_listing() -> None:
     assert "sm:grid-cols-2" in response.text
     assert 'href="http://testserver/notes"' in response.text
     assert 'href="https://github.com/Kumikochan99/maker-swap"' in response.text
-    assert "Demo project · CognitioLabs assessment." in response.text
+    assert 'href="https://github.com/Kumikochan99"' in response.text
+    assert "A public second-hand maker marketplace demo" in response.text
+    assert response.text.count('data-listing-status="Reserved"') == 2
+    assert response.text.count('data-listing-status="Sold"') == 1
+
+
+def test_fixed_navigation_is_the_only_category_control() -> None:
+    response = client.get("/")
+
+    assert response.status_code == 200
+    assert 'class="site-header fixed' in response.text
+    assert 'id="site-category-menu"' in response.text
+    assert 'id="category-menu-toggle"' in response.text
+    assert "All Listings" in response.text
+    assert ">3D Printing</a>" in response.text
+    assert ">Electronics</a>" in response.text
+    assert ">Instruments</a>" in response.text
+    assert ">Art Supplies</a>" in response.text
+    assert ">Workshop Tools</a>" in response.text
+    assert "category-pill" not in response.text
+    assert ">Browse</a>" not in response.text
 
 
 def test_category_filter_limits_visible_listings() -> None:
@@ -73,11 +106,29 @@ def test_listing_detail_uses_plain_pickup_area_data() -> None:
     assert "Original Prusa MINI+" in response.text
     assert "S$420" in response.text
     assert "Jurong East" in response.text
-    assert "No seller profile or messaging is available." in response.text
+    assert "Availability and location are seeded display data" in response.text
     assert 'href="http://testserver/#listings"' in response.text
     assert 'data-catalogue-url="http://testserver/#listings"' in response.text
     assert "data-listing-card" in response.text
-    assert 'src="http://testserver/static/detail.js"' in response.text
+    assert 'src="http://testserver/static/detail.js?v=gallery-1"' in response.text
+
+
+def test_listing_detail_renders_gallery_specs_and_static_status() -> None:
+    reserved = client.get("/listings/bambu-lab-a1-mini")
+    sold = client.get("/listings/arduino-sensor-starter-kit")
+
+    assert reserved.status_code == 200
+    assert reserved.text.count("data-gallery-thumbnail") == 3
+    assert "data-gallery-main" in reserved.text
+    assert "Build volume" in reserved.text
+    assert 'data-status="Reserved"' in reserved.text
+    assert "There is no seller messaging or interactive reservation flow." in reserved.text
+    assert "not photographs of a seller's item" in reserved.text
+
+    assert sold.status_code == 200
+    assert 'data-status="Sold"' in sold.text
+    assert "stays visible as catalogue history" in sold.text
+    assert "There is no seller profile, messaging or purchase flow." in sold.text
 
 
 def test_unknown_listing_returns_friendly_404() -> None:

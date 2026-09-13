@@ -51,12 +51,22 @@
     const card = cardTemplate.content.firstElementChild.cloneNode(true);
     const link = card.querySelector("[data-card-link]");
     const image = card.querySelector("[data-card-image]");
+    const statusBadge = card.querySelector("[data-card-status]");
+    const listingStatus = listing.status || "Available";
+    const statusLabel = listingStatus === "Available" ? "" : `, status ${listingStatus}`;
 
     card.dataset.listingId = listing.id;
+    card.dataset.listingStatus = listingStatus;
     link.href = `/listings/${encodeURIComponent(listing.id)}`;
-    link.setAttribute("aria-label", `View ${listing.title} for S$${money.format(listing.price)}`);
+    link.setAttribute(
+      "aria-label",
+      `View ${listing.title} for S$${money.format(listing.price)}${statusLabel}`,
+    );
     image.src = listing.image;
     image.alt = `Illustration for ${listing.title}`;
+    statusBadge.textContent = listingStatus;
+    statusBadge.dataset.status = listingStatus;
+    statusBadge.classList.toggle("hidden", listingStatus === "Available");
     card.querySelector("[data-card-category]").textContent = listing.category;
     card.querySelector("[data-card-condition]").textContent = listing.condition;
     card.querySelector("[data-card-title]").textContent = listing.title;

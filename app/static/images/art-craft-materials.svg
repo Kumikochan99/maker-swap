@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" role="img" aria-labelledby="title">
+  <title id="title">Stylised palette of paints, paper and craft materials</title>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#fff7ed"/><stop offset="1" stop-color="#fed7aa"/></linearGradient>
+    <filter id="shadow"><feDropShadow dx="0" dy="16" stdDeviation="14" flood-color="#0f172a" flood-opacity=".16"/></filter>
+  </defs>
+  <rect width="800" height="600" fill="url(#bg)"/>
+  <g filter="url(#shadow)">
+    <rect x="82" y="94" width="420" height="412" rx="38" fill="#fff"/>
+    <g transform="translate(118 132)">
+      <rect width="150" height="100" rx="22" fill="#c2410c"/><rect x="170" width="150" height="100" rx="22" fill="#047857"/>
+      <rect y="122" width="150" height="100" rx="22" fill="#f59e0b"/><rect x="170" y="122" width="150" height="100" rx="22" fill="#2563eb"/>
+      <rect y="244" width="150" height="100" rx="22" fill="#db2777"/><rect x="170" y="244" width="150" height="100" rx="22" fill="#334155"/>
+    </g>
+    <path d="M570 122h126v366H570z" fill="#f8fafc"/>
+  </g>
+  <path d="M592 122v366M632 122v366M672 122v366" stroke="#cbd5e1" stroke-width="5"/>
+  <circle cx="634" cy="430" r="86" fill="none" stroke="#f97316" stroke-width="32"/>
+</svg>

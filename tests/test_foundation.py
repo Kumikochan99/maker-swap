@@ -26,6 +26,7 @@ def test_notes_page_is_real_and_truthful() -> None:
 
     assert response.status_code == 200
     assert "What this demo is - and is not." in response.text
+    assert "Build notes / Current demo" in response.text
     assert 'id="built-for"' in response.text
     assert 'id="seeded-limited"' in response.text
     assert 'id="ai-tools"' in response.text
@@ -36,4 +37,7 @@ def test_notes_page_is_real_and_truthful() -> None:
     assert "openai/gpt-4o-mini" in response.text
     assert "gpt-5.6-sol max" in response.text
     assert "Budget language is approximate." in response.text
+    assert "13 listings Available, two Reserved and one Sold" in response.text
+    assert "representative artwork shared within a category" in response.text
+    assert "fixed seed labels only" in response.text
     assert "CLASSGW_KEY" not in response.text

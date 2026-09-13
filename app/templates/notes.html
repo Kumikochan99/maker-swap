@@ -7,7 +7,7 @@
   <section class="border-b border-stone-200 bg-slate-950 text-white">
     <div class="mx-auto max-w-7xl px-5 py-14 sm:px-8 sm:py-20">
       <div class="max-w-4xl">
-        <p class="text-sm font-bold uppercase tracking-[0.2em] text-orange-400">Build notes / Phase 5</p>
+        <p class="text-sm font-bold uppercase tracking-[0.2em] text-orange-400">Build notes / Current demo</p>
         <h1 class="mt-4 font-display text-5xl font-bold tracking-tight sm:text-6xl">What this demo is - and is not.</h1>
         <p class="mt-6 max-w-3xl text-lg leading-8 text-slate-300 sm:text-xl">
           A candid account of the product, the real AI behind it, and the tradeoffs made to ship a focused assessment in 72 hours.
@@ -58,7 +58,7 @@
             Maker Swap is a public, mobile-responsive second-hand marketplace demo for makers and hobbyists in Singapore: people looking for equipment for 3D printing, electronics, music, art and workshop projects without buying everything new. It was built for the CognitioLabs Associate Forward Deployed Engineer assessment, so the goal is to demonstrate a coherent end-to-end product rather than imitate a production marketplace.
           </p>
           <p>
-            A visitor can browse all five categories, filter the catalogue, open a full item detail page, describe a need in natural language, and ask follow-up questions in the floating catalogue assistant. The entire browse-to-detail flow is available without an account, and the reviewer does not need to supply an AI key.
+            A visitor can browse all five categories, filter from the fixed glass navigation, open an item detail page with an illustrated gallery and structured specifications, describe a need in natural language, and ask follow-up questions in the floating catalogue assistant. Static availability badges distinguish available, reserved and sold seeds. The entire flow is available without an account, and the reviewer does not need to supply an AI key.
           </p>
           <p>
             The application is one FastAPI service on Render. FastAPI reads the catalogue into memory and serves Jinja2 HTML directly; Tailwind CSS is loaded from its CDN. There is no React application, Node build, separate front-end deployment or database. That deliberately small stack left more of the 72-hour window for search relevance, grounded answers and the user-facing flow.
@@ -78,15 +78,19 @@
         <ul class="mt-6 grid gap-4 text-sm leading-6 text-slate-600 sm:grid-cols-2">
           <li class="rounded-2xl bg-stone-50 p-5">
             <strong class="block text-base text-slate-950">Every listing is seeded</strong>
-            <span class="mt-1 block">The 16 IDs, titles, Singapore-dollar prices, categories, conditions, descriptions, pickup areas and discovery tags are authored demo data. They are not seller submissions or live stock.</span>
+            <span class="mt-1 block">The 16 IDs, titles, Singapore-dollar prices, categories, conditions, descriptions, specifications, tags, pickup areas and statuses are authored demo data. They are not seller submissions or live stock.</span>
           </li>
           <li class="rounded-2xl bg-stone-50 p-5">
             <strong class="block text-base text-slate-950">Artwork is representative</strong>
-            <span class="mt-1 block">Each category uses a local reusable SVG illustration. These are reliable demo assets, not photographs of the individual items.</span>
+            <span class="mt-1 block">Each category uses a set of three local reusable SVG illustrations for main, detail and included-material views. They make every gallery self-contained and reliable, but they are representative artwork shared within a category, not photographs of an individual seller's item.</span>
           </li>
           <li class="rounded-2xl bg-stone-50 p-5">
             <strong class="block text-base text-slate-950">Pickup areas are display text</strong>
             <span class="mt-1 block">Areas such as Jurong East or Bedok add realistic browsing context; they do not identify real sellers or expose precise live locations.</span>
+          </li>
+          <li class="rounded-2xl bg-stone-50 p-5">
+            <strong class="block text-base text-slate-950">Availability is static</strong>
+            <span class="mt-1 block">The seed data marks 13 listings Available, two Reserved and one Sold. These badges do not change in the browser and are not backed by an order, reservation or inventory workflow.</span>
           </li>
           <li class="rounded-2xl bg-stone-50 p-5">
             <strong class="block text-base text-slate-950">There is no persistent inventory</strong>
@@ -165,7 +169,7 @@
           </div>
           <div class="grid gap-2 border-b border-stone-200 p-5 sm:grid-cols-[12rem_1fr] sm:gap-6">
             <h3 class="font-bold text-slate-950">Payments and checkout</h3>
-            <p class="text-sm leading-6 text-slate-600">No cart, payment processor or order state. A fake checkout would imply a transaction capability that does not exist, while real payment work is explicitly outside the brief.</p>
+            <p class="text-sm leading-6 text-slate-600">No cart, payment processor or interactive order state. Reserved and Sold are fixed seed labels only; a fake checkout or editable reservation would imply transaction capability that does not exist, while real payment work is explicitly outside the brief.</p>
           </div>
           <div class="grid gap-2 border-b border-stone-200 bg-stone-50 p-5 sm:grid-cols-[12rem_1fr] sm:gap-6">
             <h3 class="font-bold text-slate-950">Messaging and logistics</h3>
@@ -204,7 +208,7 @@
             <strong class="text-slate-950">Q&amp;A cannot know what the seeds do not say.</strong> It has no evidence for warranties, policies, seller details, exact availability beyond the current demo records, or facts outside the catalogue. Refusing those questions is intended behavior, not hidden completion.
           </li>
           <li class="border-l-2 border-amber-400 pl-4">
-            <strong class="text-slate-950">This stops before a transaction.</strong> Browse, detail, search and catalogue Q&amp;A are implemented; contacting a seller, reserving an item, paying and arranging delivery remain deliberately unbuilt. The demo should not be mistaken for a production marketplace.
+            <strong class="text-slate-950">This stops before a transaction.</strong> Browse, detail galleries, static status display, search and catalogue Q&amp;A are implemented; contacting a seller, changing a reservation or sold status, paying and arranging delivery remain deliberately unbuilt. The demo should not be mistaken for a production marketplace.
           </li>
         </ul>
       </section>

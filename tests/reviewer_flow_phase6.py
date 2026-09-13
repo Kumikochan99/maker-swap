@@ -46,13 +46,18 @@ def run_reviewer_flow(page: Page) -> dict[str, object]:
     expect(page.get_by_role("heading", name="Good tools deserve a second project.")).to_be_visible()
     expect(page.locator("#listing-grid > [data-listing-id]")).to_have_count(16)
 
+    page.locator("#category-menu-toggle").click()
+    expect(page.locator("#category-menu-toggle")).to_have_attribute(
+        "aria-expanded", "true"
+    )
     page.get_by_role("link", name="Electronics", exact=True).click()
     page.wait_for_url(re.compile(r"\?category=Electronics#listings$"))
     expect(page.locator("#listing-grid > [data-listing-id]")).to_have_count(4)
     category_scroll_y = page.evaluate("window.scrollY")
     assert category_scroll_y > 0
 
-    page.get_by_role("link", name="All", exact=True).click()
+    page.locator("#category-menu-toggle").click()
+    page.get_by_role("link", name="All Listings", exact=True).click()
     page.wait_for_url(re.compile(r"/#listings$"))
     expect(page.locator("#listing-grid > [data-listing-id]")).to_have_count(16)
 
@@ -78,6 +83,9 @@ def run_reviewer_flow(page: Page) -> dict[str, object]:
     expect(
         page.get_by_role("heading", name="Hakko FX-888D Soldering Station")
     ).to_be_visible()
+    expect(page.locator("[data-gallery-thumbnail]")).to_have_count(3)
+    page.locator("[data-gallery-next]").click()
+    expect(page.locator("[data-gallery-counter]")).to_have_text("2 / 3")
 
     page.locator("#catalogue-chat-toggle").click()
     expect(page.locator("#catalogue-chat-panel")).to_be_visible()
@@ -110,9 +118,9 @@ def run_reviewer_flow(page: Page) -> dict[str, object]:
     page.screenshot(path=ARTIFACT_DIR / "02-detail-qa.png", full_page=False)
 
     page.locator("#catalogue-chat-close").click()
-    page.get_by_role("link", name="/notes", exact=True).click()
+    page.get_by_role("link", name="Build notes", exact=True).click()
     page.wait_for_url(re.compile(r"/notes$"))
-    expect(page.get_by_text("Build notes / Phase 5", exact=True)).to_be_visible()
+    expect(page.get_by_text("Build notes / Current demo", exact=True)).to_be_visible()
     expect(page.locator("main section[id]")).to_have_count(5)
     expect(page.get_by_text("gpt-5.6-sol max", exact=True)).to_be_visible()
     expect(page.get_by_text("Budget language is approximate.", exact=True)).to_be_visible()

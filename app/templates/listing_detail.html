@@ -6,25 +6,73 @@
 <main id="main-content" class="detail-backdrop px-5 py-8 sm:px-8 sm:py-12" data-catalogue-backdrop data-catalogue-url="{{ url_for('home') }}#listings">
   <div class="mx-auto max-w-7xl">
     <nav aria-label="Breadcrumb" class="mb-8 text-sm font-semibold text-slate-500">
-      <a href="{{ url_for('home') }}#listings" class="transition hover:text-orange-700">Browse</a>
+      <a href="{{ url_for('home') }}#listings" class="transition hover:text-orange-700">All listings</a>
       <span aria-hidden="true" class="mx-2">/</span>
       <span class="text-slate-800">{{ listing.category }}</span>
     </nav>
 
     <article data-listing-card class="overflow-hidden rounded-[2rem] border border-stone-200 bg-white shadow-xl shadow-stone-200/50">
-      <div class="grid lg:grid-cols-2">
-        <div class="bg-stone-100">
-          <img src="{{ listing.image }}" alt="Illustration for {{ listing.title }}" class="h-full min-h-80 w-full object-cover lg:min-h-[38rem]">
-        </div>
-        <div class="flex flex-col p-7 sm:p-10 lg:p-14">
+      <div class="grid lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)]">
+        <section class="listing-gallery min-w-0 border-b border-stone-200 bg-stone-100 lg:border-b-0 lg:border-r" data-gallery aria-label="Illustrated gallery for {{ listing.title }}">
+          <div class="relative overflow-hidden bg-stone-100">
+            <img
+              data-gallery-main
+              src="{{ listing.images[0] }}"
+              alt="Illustrated view 1 of {{ listing.images | length }} for {{ listing.title }}"
+              class="aspect-[4/3] w-full object-cover lg:aspect-[5/4]"
+            >
+            <button type="button" class="gallery-arrow gallery-arrow-previous absolute left-3 top-1/2 grid h-11 w-11 -translate-y-1/2 place-items-center rounded-full" data-gallery-previous aria-label="Show previous gallery image">
+              <svg viewBox="0 0 20 20" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m12.5 4.5-5 5.5 5 5.5"></path></svg>
+            </button>
+            <button type="button" class="gallery-arrow gallery-arrow-next absolute right-3 top-1/2 grid h-11 w-11 -translate-y-1/2 place-items-center rounded-full" data-gallery-next aria-label="Show next gallery image">
+              <svg viewBox="0 0 20 20" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m7.5 4.5 5 5.5-5 5.5"></path></svg>
+            </button>
+            <span class="gallery-counter absolute bottom-3 right-3 rounded-full px-3 py-1.5 text-xs font-bold" data-gallery-counter aria-hidden="true">1 / {{ listing.images | length }}</span>
+          </div>
+
+          <div class="border-t border-stone-200 bg-stone-50 p-4 sm:p-5">
+            <div class="gallery-thumbnails flex gap-3 overflow-x-auto pb-1" aria-label="Choose an illustrated view">
+              {% for gallery_image in listing.images %}
+                <button
+                  type="button"
+                  class="gallery-thumbnail min-w-24 flex-1 overflow-hidden rounded-2xl border-2 bg-stone-100 sm:min-w-28 {% if loop.first %}is-active{% endif %}"
+                  data-gallery-thumbnail
+                  data-gallery-index="{{ loop.index0 }}"
+                  data-gallery-src="{{ gallery_image }}"
+                  aria-label="Show illustrated view {{ loop.index }} of {{ listing.images | length }}"
+                  aria-pressed="{% if loop.first %}true{% else %}false{% endif %}"
+                >
+                  <img src="{{ gallery_image }}" alt="" class="aspect-[4/3] w-full object-cover" loading="{% if loop.first %}eager{% else %}lazy{% endif %}">
+                </button>
+              {% endfor %}
+            </div>
+            <p class="mt-3 text-xs leading-5 text-slate-500">Representative locally hosted SVG views for this seeded demo; not photographs of a seller's item.</p>
+            <p class="sr-only" data-gallery-live aria-live="polite">Showing illustrated view 1 of {{ listing.images | length }}</p>
+          </div>
+        </section>
+
+        <div class="flex min-w-0 flex-col p-7 sm:p-10 lg:p-12 xl:p-14">
           <div class="flex flex-wrap items-center gap-3 text-xs font-bold uppercase tracking-[0.14em]">
             <span class="text-orange-700">{{ listing.category }}</span>
             <span class="rounded-full bg-emerald-100 px-3 py-1.5 text-emerald-800">{{ listing.condition }}</span>
+            <span class="listing-status-badge rounded-full px-3 py-1.5" data-status="{{ listing.status }}">{{ listing.status }}</span>
           </div>
 
           <h1 class="mt-6 font-display text-4xl font-bold leading-tight tracking-[-0.035em] sm:text-5xl">{{ listing.title }}</h1>
           <p class="mt-5 font-display text-4xl font-bold text-slate-950">S${{ "{:,}".format(listing.price) }}</p>
           <p class="mt-7 text-lg leading-8 text-slate-600">{{ listing.description }}</p>
+
+          <section class="mt-9" aria-labelledby="specifications-heading">
+            <h2 id="specifications-heading" class="text-sm font-bold uppercase tracking-[0.16em] text-slate-500">Listing details</h2>
+            <dl class="mt-4 overflow-hidden rounded-2xl border border-stone-200">
+              {% for spec in listing.specs %}
+                <div class="grid gap-1 border-b border-stone-200 px-4 py-3 last:border-b-0 sm:grid-cols-[9rem_1fr] sm:gap-4 sm:px-5">
+                  <dt class="text-sm font-semibold text-slate-500">{{ spec.label }}</dt>
+                  <dd class="text-sm font-bold text-slate-800">{{ spec.value }}</dd>
+                </div>
+              {% endfor %}
+            </dl>
+          </section>
 
           <section class="mt-9" aria-labelledby="good-for-heading">
             <h2 id="good-for-heading" class="text-sm font-bold uppercase tracking-[0.16em] text-slate-500">Good for</h2>
@@ -38,7 +86,13 @@
           <div class="mt-10 rounded-2xl bg-slate-950 p-5 text-white sm:p-6">
             <p class="text-xs font-bold uppercase tracking-[0.16em] text-orange-400">Pickup area</p>
             <p class="mt-2 font-display text-2xl font-bold">{{ listing.pickup_area }}</p>
-            <p class="mt-2 text-sm leading-6 text-slate-300">Location is approximate display data for this seeded demo. No seller profile or messaging is available.</p>
+            {% if listing.status == 'Sold' %}
+              <p class="mt-2 text-sm leading-6 text-slate-300">This item is marked Sold in the seeded catalogue and stays visible as catalogue history. There is no seller profile, messaging or purchase flow.</p>
+            {% elif listing.status == 'Reserved' %}
+              <p class="mt-2 text-sm leading-6 text-slate-300">This item is marked Reserved in the seeded catalogue while pickup is represented as being arranged. There is no seller messaging or interactive reservation flow.</p>
+            {% else %}
+              <p class="mt-2 text-sm leading-6 text-slate-300">Availability and location are seeded display data for this demo. There is no seller profile, messaging or purchase flow.</p>
+            {% endif %}
           </div>
 
           <a href="{{ url_for('home') }}#listings" class="mt-8 inline-flex w-fit items-center gap-2 rounded-full border border-stone-300 px-5 py-3 text-sm font-bold transition hover:border-slate-950 hover:bg-slate-950 hover:text-white">
@@ -52,5 +106,5 @@
 {% endblock %}
 
 {% block scripts %}
-<script src="{{ url_for('static', path='/detail.js') }}" defer></script>
+<script src="{{ url_for('static', path='/detail.js') }}?v=gallery-1" defer></script>
 {% endblock %}

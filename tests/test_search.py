@@ -107,9 +107,12 @@ def test_listing_embedding_text_contains_every_searchable_field() -> None:
     assert listing.title.casefold() in text
     assert listing.category.casefold() in text
     assert listing.condition.casefold() in text
+    assert listing.status.casefold() in text
     assert listing.description.casefold() in text
     assert listing.pickup_area.casefold() in text
     assert all(tag.casefold() in text for tag in listing.tags)
+    assert all(spec.label.casefold() in text for spec in listing.specs)
+    assert all(spec.value.casefold() in text for spec in listing.specs)
 
 
 def test_discovery_embedding_focuses_on_title_category_and_tags() -> None:
@@ -118,6 +121,7 @@ def test_discovery_embedding_focuses_on_title_category_and_tags() -> None:
 
     assert listing.title.casefold() in text
     assert listing.category.casefold() in text
+    assert listing.status.casefold() in text
     assert all(tag.casefold() in text for tag in listing.tags)
 
 
@@ -361,5 +365,7 @@ def test_browse_page_includes_async_search_states() -> None:
     assert 'id="search-status"' in response.text
     assert 'id="catalogue-empty-state"' in response.text
     assert 'id="browse-all-items"' in response.text
-    assert 'src="http://testserver/static/search.js?v=phase3-reset-1"' in response.text
+    assert 'src="http://testserver/static/search.js?v=polish-status-1"' in response.text
+    assert "data-card-status" in response.text
+    assert "data-listing-status" in response.text
     assert "CLASSGW_KEY" not in response.text

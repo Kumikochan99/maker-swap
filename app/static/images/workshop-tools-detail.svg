@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" role="img" aria-labelledby="title">
+  <title id="title">Stylised drill chuck, bit and timber close-up</title>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#fffbeb"/><stop offset="1" stop-color="#fde68a"/></linearGradient>
+    <filter id="shadow"><feDropShadow dx="0" dy="18" stdDeviation="16" flood-color="#0f172a" flood-opacity=".2"/></filter>
+  </defs>
+  <rect width="800" height="600" fill="url(#bg)"/>
+  <g filter="url(#shadow)">
+    <path d="M72 98h356c66 0 120 54 120 120v92H318l-72-80H72z" fill="#047857"/>
+    <rect x="326" y="248" width="248" height="110" rx="36" fill="#0f172a"/>
+    <path d="M574 303h120" stroke="#64748b" stroke-width="32" stroke-linecap="round"/>
+    <path d="M630 280l64 46M630 326l64-46" stroke="#cbd5e1" stroke-width="8"/>
+    <rect x="86" y="414" width="640" height="116" rx="24" fill="#9a3412"/>
+  </g>
+  <path d="M118 452c110-42 160 54 270 8s188 40 302-4" fill="none" stroke="#fdba74" stroke-width="10" stroke-linecap="round" opacity=".8"/>
+  <circle cx="696" cy="303" r="16" fill="#f97316"/>
+</svg>
