@@ -31,6 +31,12 @@ from app.search import (
 
 
 BASE_DIR = Path(__file__).resolve().parent
+FEATURED_LISTING_IDS = (
+    "original-prusa-mini-plus",
+    "raspberry-pi-4-workbench",
+    "yamaha-pacifica-112v",
+    "watercolour-studio-set",
+)
 
 app = FastAPI(
     title="Maker Swap",
@@ -48,6 +54,16 @@ def home(
     category: str | None = Query(default=None, max_length=50),
 ) -> HTMLResponse:
     listings = load_listings()
+    listings_by_id = {listing.id: listing for listing in listings}
+    try:
+        featured_listings = tuple(
+            listings_by_id[listing_id] for listing_id in FEATURED_LISTING_IDS
+        )
+    except KeyError as exc:
+        raise CatalogLoadError(
+            "A configured featured listing is unavailable."
+        ) from exc
+
     selected_category = category.strip() if category else None
     visible_listings = (
         tuple(
@@ -66,6 +82,7 @@ def home(
             "listings": visible_listings,
             "listing_count": len(visible_listings),
             "categories": get_categories(),
+            "featured_listings": featured_listings,
             "selected_category": selected_category,
         },
     )

@@ -128,10 +128,15 @@ def verify_keyboard_and_labels(page: Page) -> dict[str, object]:
     assert skip_focus["outlineWidth"] >= 3
     assert skip_focus["box"]["y"] >= 0
 
-    page.keyboard.press("Tab")
-    page.keyboard.press("Tab")
-    page.keyboard.press("Tab")
-    input_focus = focused_element_state(page)
+    input_focus = None
+    for _ in range(20):
+        page.keyboard.press("Tab")
+        candidate = focused_element_state(page)
+        if candidate["id"] == "catalogue-search-query":
+            input_focus = candidate
+            break
+
+    assert input_focus is not None
     assert input_focus["id"] == "catalogue-search-query"
     assert input_focus["outlineStyle"] != "none"
     assert input_focus["outlineWidth"] >= 3
@@ -209,6 +214,56 @@ def verify_viewport(
     first_card_box = page.locator("#listing-grid > [data-listing-id]").first.bounding_box()
     assert first_card_box is not None and first_card_box["width"] <= viewport["width"]
 
+    featured_carousel = page.locator("[data-featured-carousel]")
+    expect(featured_carousel).to_be_visible()
+    expect(page.locator("[data-featured-slide]")).to_have_count(4)
+    featured_interval = int(featured_carousel.get_attribute("data-interval-ms"))
+    assert 6_000 <= featured_interval <= 9_000
+    featured_next = page.get_by_role("button", name="Next featured listing")
+    featured_next.scroll_into_view_if_needed()
+    featured_previous_box = assert_inside_viewport(
+        page, "[data-featured-previous]"
+    )
+    featured_next_box = assert_inside_viewport(page, "[data-featured-next]")
+    assert featured_previous_box["width"] >= 44
+    assert featured_previous_box["height"] >= 44
+    assert featured_next_box["width"] >= 44
+    assert featured_next_box["height"] >= 44
+    featured_next.click()
+    expect(page.locator("[data-featured-track]")).to_have_attribute(
+        "data-active-index", "1"
+    )
+    expect(
+        page.locator('[data-featured-id="raspberry-pi-4-workbench"]')
+    ).to_have_attribute("aria-hidden", "false")
+    page.wait_for_timeout(600)
+    featured_geometry = featured_carousel.evaluate(
+        """element => {
+            const viewport = element.querySelector('.featured-carousel-viewport')
+                .getBoundingClientRect();
+            const active = element.querySelector('[aria-hidden="false"]')
+                .getBoundingClientRect();
+            return {
+                viewport: {
+                    x: viewport.x + element.querySelector('.featured-carousel-viewport').clientLeft,
+                    width: element.querySelector('.featured-carousel-viewport').clientWidth,
+                },
+                active: { x: active.x, width: active.width },
+            };
+        }"""
+    )
+    assert featured_geometry["active"]["x"] == pytest.approx(
+        featured_geometry["viewport"]["x"], abs=1
+    ), featured_geometry
+    assert featured_geometry["active"]["width"] == pytest.approx(
+        featured_geometry["viewport"]["width"], abs=1
+    ), featured_geometry
+    assert_no_horizontal_page_overflow(page)
+    page.screenshot(
+        path=ARTIFACT_DIR / f"featured-carousel-{viewport['width']}.png",
+        full_page=False,
+    )
+
     chip_nav = page.locator(".category-chip-nav")
     expect(chip_nav).to_be_visible()
     chip_metrics = chip_nav.evaluate(
@@ -246,6 +301,9 @@ def verify_viewport(
         "nav_brand": measured_contrast(page, ".site-brand", ".site-glass-nav"),
         "footer_copy": measured_contrast(page, ".site-footer p", ".site-footer"),
         "chat_toggle": measured_contrast(page, "#catalogue-chat-toggle"),
+        "featured_title": measured_contrast(
+            page, ".featured-carousel-copy h3", ".featured-carousel-copy"
+        ),
     }
     assert all(ratio >= 4.5 for ratio in contrast.values())
 
@@ -398,6 +456,15 @@ def verify_viewport(
             "container_width": chip_metrics["width"],
             "scroll_width": chip_metrics["scrollWidth"],
             "fits_list_and_gallery": True,
+        },
+        "featured_carousel": {
+            "slides": 4,
+            "interval_ms": featured_interval,
+            "previous_control": featured_previous_box,
+            "next_control": featured_next_box,
+            "manual_advance": True,
+            "active_slide_geometry": featured_geometry,
+            "horizontal_overflow": False,
         },
         "contrast_ratios": {
             name: round(ratio, 2) for name, ratio in contrast.items()

@@ -160,6 +160,64 @@ def test_category_filter_preserves_catalogue_scroll_position(
     page.context.close()
 
 
+def test_featured_carousel_auto_advances_and_pauses_on_hover(
+    browser: Browser,
+    browser_base_url: str,
+) -> None:
+    context = browser.new_context(viewport={"width": 1280, "height": 720})
+    page = context.new_page()
+    page.clock.install()
+    page.goto(browser_base_url, wait_until="networkidle")
+    carousel = page.locator("[data-featured-carousel]")
+    track = page.locator("[data-featured-track]")
+
+    expect(page.locator("[data-featured-slide]")).to_have_count(4)
+    expect(track).to_have_attribute("data-active-index", "0")
+    expect(carousel).to_have_attribute("data-auto-state", "running")
+
+    page.clock.fast_forward(7_100)
+    expect(track).to_have_attribute("data-active-index", "1")
+
+    carousel.hover()
+    expect(carousel).to_have_attribute("data-auto-state", "paused")
+    page.clock.fast_forward(14_000)
+    expect(track).to_have_attribute("data-active-index", "1")
+
+    page.locator(".hero-grid h1").hover()
+    expect(carousel).to_have_attribute("data-auto-state", "running")
+    page.clock.fast_forward(7_100)
+    expect(track).to_have_attribute("data-active-index", "2")
+    context.close()
+
+
+def test_featured_carousel_arrows_and_active_slide_link_work(
+    browser: Browser,
+    browser_base_url: str,
+) -> None:
+    page = open_page(browser, browser_base_url)
+    track = page.locator("[data-featured-track]")
+    slides = page.locator("[data-featured-slide]")
+
+    page.get_by_role("button", name="Next featured listing").click()
+    expect(track).to_have_attribute("data-active-index", "1")
+    expect(page.locator("[data-featured-current]")).to_have_text("2")
+    expect(slides.nth(0)).to_have_attribute("aria-hidden", "true")
+    expect(slides.nth(1)).to_have_attribute("aria-hidden", "false")
+    expect(page.locator("[data-featured-status]")).to_contain_text(
+        "Raspberry Pi 4 Workbench Set"
+    )
+
+    page.get_by_role("button", name="Previous featured listing").click()
+    expect(track).to_have_attribute("data-active-index", "0")
+    with page.expect_navigation(wait_until="domcontentloaded"):
+        slides.nth(0).locator("[data-featured-link]").click()
+    expect(page).to_have_url(
+        re.compile(r"/listings/original-prusa-mini-plus$")
+    )
+    expect(page.get_by_role("heading", name="Original Prusa MINI+")).to_be_visible()
+    page.context.close()
+
+
 def test_category_chip_preserves_catalogue_scroll_position(
     browser: Browser,
     browser_base_url: str,
@@ -443,6 +501,56 @@ def test_compact_catalogue_gallery_is_two_columns_and_readable_on_mobile(
     assert restored_state["columns"] == 1
     assert restored_state["cardWidth"] == pytest.approx(list_state["cardWidth"], abs=1)
     expect(first_card.locator("[data-card-description]")).to_be_visible()
+    page.context.close()
+
+
+@pytest.mark.parametrize("width,height", [(390, 844), (430, 932)])
+def test_featured_carousel_controls_fit_mobile_viewports(
+    browser: Browser,
+    browser_base_url: str,
+    width: int,
+    height: int,
+) -> None:
+    page = open_page(
+        browser,
+        browser_base_url,
+        "/",
+        {"width": width, "height": height},
+    )
+    carousel = page.locator("[data-featured-carousel]")
+    previous_button = page.get_by_role("button", name="Previous featured listing")
+    next_button = page.get_by_role("button", name="Next featured listing")
+    next_button.scroll_into_view_if_needed()
+
+    dimensions = page.evaluate(
+        """() => ({
+            viewport: window.innerWidth,
+            document: document.documentElement.scrollWidth,
+            body: document.body.scrollWidth,
+        })"""
+    )
+    assert dimensions["document"] <= dimensions["viewport"] + 1
+    assert dimensions["body"] <= dimensions["viewport"] + 1
+    assert carousel.get_attribute("data-interval-ms") == "7000"
+    assert 6_000 <= int(carousel.get_attribute("data-interval-ms")) <= 9_000
+
+    for button in (previous_button, next_button):
+        box = button.bounding_box()
+        assert box is not None
+        assert box["width"] >= 44
+        assert box["height"] >= 44
+        assert box["x"] >= 0
+        assert box["x"] + box["width"] <= width + 1
+        assert box["y"] >= 0
+        assert box["y"] + box["height"] <= height + 1
+
+    next_button.click()
+    expect(page.locator("[data-featured-track]")).to_have_attribute(
+        "data-active-index", "1"
+    )
+    expect(
+        page.locator('[data-featured-id="raspberry-pi-4-workbench"]')
+    ).to_have_attribute("aria-hidden", "false")
     page.context.close()
 
 

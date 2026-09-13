@@ -1,10 +1,11 @@
+import re
 from collections import Counter
 from pathlib import Path
 
 from fastapi.testclient import TestClient
 
 from app.catalog import get_categories, get_listing, load_listings
-from app.main import app
+from app.main import FEATURED_LISTING_IDS, app
 
 
 client = TestClient(app)
@@ -54,6 +55,41 @@ def test_browse_page_renders_every_listing() -> None:
     assert "A public second-hand maker marketplace demo" in response.text
     assert response.text.count('data-listing-status="Reserved"') == 2
     assert response.text.count('data-listing-status="Sold"') == 1
+
+
+def test_home_page_carousel_features_four_available_category_representatives() -> None:
+    response = client.get("/")
+    listings_by_id = {listing.id: listing for listing in load_listings()}
+    featured = tuple(listings_by_id[listing_id] for listing_id in FEATURED_LISTING_IDS)
+
+    assert response.status_code == 200
+    assert FEATURED_LISTING_IDS == (
+        "original-prusa-mini-plus",
+        "raspberry-pi-4-workbench",
+        "yamaha-pacifica-112v",
+        "watercolour-studio-set",
+    )
+    assert tuple(listing.category for listing in featured) == (
+        "3D Printing",
+        "Electronics",
+        "Instruments",
+        "Art & Craft",
+    )
+    assert all(listing.status == "Available" for listing in featured)
+    assert re.findall(r'data-featured-id="([a-z0-9-]+)"', response.text) == list(
+        FEATURED_LISTING_IDS
+    )
+    assert response.text.count("data-featured-slide") == 4
+    assert 'data-interval-ms="7000"' in response.text
+    assert 'aria-label="Previous featured listing"' in response.text
+    assert 'aria-label="Next featured listing"' in response.text
+    assert ">Art Supplies</p>" in response.text
+    assert (
+        'src="http://testserver/static/featured-carousel.js?v=landing-polish-1"'
+        in response.text
+    )
+    for listing in featured:
+        assert f'href="http://testserver/listings/{listing.id}"' in response.text
 
 
 def test_browse_page_has_navigation_and_on_page_category_controls() -> None:
@@ -120,7 +156,7 @@ def test_category_filter_limits_visible_listings() -> None:
     assert response.status_code == 200
     assert response.text.count('data-listing-id="') == 4
     assert "Hakko FX-888D Soldering Station" in response.text
-    assert "Yamaha Pacifica 112V Guitar" not in response.text
+    assert 'data-listing-id="yamaha-pacifica-112v"' not in response.text
 
 
 def test_category_filters_return_to_catalogue_anchor() -> None:
