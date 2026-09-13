@@ -185,8 +185,8 @@ def verify_glass_navigation(page: Page) -> dict[str, object]:
     expect(toggle).to_have_attribute("aria-expanded", "true")
     panel = page.locator(".site-dropdown-panel")
     panel_box = assert_inside_viewport(page, ".site-dropdown-panel")
-    expect(page.get_by_role("link", name="All Listings", exact=True)).to_be_visible()
-    expect(page.get_by_role("link", name="Art Supplies", exact=True)).to_be_visible()
+    expect(panel.get_by_role("link", name="All Listings", exact=True)).to_be_visible()
+    expect(panel.get_by_role("link", name="Art Supplies", exact=True)).to_be_visible()
     page.keyboard.press("Escape")
     expect(panel).to_be_hidden()
     expect(toggle).to_be_focused()
@@ -208,6 +208,33 @@ def verify_viewport(
     expect(page.locator("#listing-grid > [data-listing-id]")).to_have_count(16)
     first_card_box = page.locator("#listing-grid > [data-listing-id]").first.bounding_box()
     assert first_card_box is not None and first_card_box["width"] <= viewport["width"]
+
+    chip_nav = page.locator(".category-chip-nav")
+    expect(chip_nav).to_be_visible()
+    chip_metrics = chip_nav.evaluate(
+        """element => {
+            const box = element.getBoundingClientRect();
+            return {
+                x: box.x,
+                width: box.width,
+                clientWidth: element.clientWidth,
+                scrollWidth: element.scrollWidth,
+                pillCount: element.querySelectorAll('.category-pill').length,
+            };
+        }"""
+    )
+    assert chip_metrics["x"] >= 0
+    assert chip_metrics["x"] + chip_metrics["width"] <= viewport["width"] + 1
+    assert chip_metrics["pillCount"] == 6
+    assert chip_metrics["scrollWidth"] >= chip_metrics["clientWidth"]
+    expect(chip_nav.get_by_role("link", name="All", exact=True)).to_have_attribute(
+        "aria-current", "page"
+    )
+    chip_nav.scroll_into_view_if_needed()
+    page.screenshot(
+        path=ARTIFACT_DIR / f"browse-chips-list-{viewport['width']}.png",
+        full_page=False,
+    )
 
     glass_navigation = verify_glass_navigation(page)
     page.goto(f"{BASE_URL}/", wait_until="networkidle")
@@ -244,6 +271,30 @@ def verify_viewport(
     )
     assert all(width < first_card_box["width"] * 0.55 for width in gallery_metrics["cardWidths"])
     assert_no_horizontal_page_overflow(page)
+    gallery_chip_metrics = page.locator(".category-chip-nav").evaluate(
+        """element => {
+            const box = element.getBoundingClientRect();
+            return {
+                x: box.x,
+                width: box.width,
+                clientWidth: element.clientWidth,
+                scrollWidth: element.scrollWidth,
+                pillCount: element.querySelectorAll('.category-pill').length,
+            };
+        }"""
+    )
+    assert gallery_chip_metrics["x"] >= 0
+    assert (
+        gallery_chip_metrics["x"] + gallery_chip_metrics["width"]
+        <= viewport["width"] + 1
+    )
+    assert gallery_chip_metrics["pillCount"] == 6
+    assert gallery_chip_metrics["scrollWidth"] >= gallery_chip_metrics["clientWidth"]
+    page.locator(".category-chip-nav").scroll_into_view_if_needed()
+    page.screenshot(
+        path=ARTIFACT_DIR / f"browse-chips-gallery-{viewport['width']}.png",
+        full_page=False,
+    )
 
     badge_contrast = {}
     for listing_id, status_name in (
@@ -341,6 +392,12 @@ def verify_viewport(
                 name: round(ratio, 2) for name, ratio in badge_contrast.items()
             },
             "list_width_restored": restored_width["width"],
+        },
+        "category_chips": {
+            "count": chip_metrics["pillCount"],
+            "container_width": chip_metrics["width"],
+            "scroll_width": chip_metrics["scrollWidth"],
+            "fits_list_and_gallery": True,
         },
         "contrast_ratios": {
             name: round(ratio, 2) for name, ratio in contrast.items()

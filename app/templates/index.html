@@ -93,6 +93,15 @@
       <p id="listing-view-status" class="sr-only" role="status" aria-live="polite"></p>
     </div>
 
+    <nav class="category-chip-nav mt-6 flex w-full max-w-full gap-2 overflow-x-auto pb-2" aria-label="Browse-page categories">
+      <a href="{{ url_for('home') }}#listings" class="category-pill {% if not selected_category %}category-pill-active{% endif %}" {% if not selected_category %}aria-current="page"{% endif %}>All</a>
+      {% for category in categories %}
+        <a href="{{ url_for('home') }}?category={{ category | urlencode }}#listings" class="category-pill {% if selected_category == category %}category-pill-active{% endif %}" {% if selected_category == category %}aria-current="page"{% endif %}>
+          {{ category }}
+        </a>
+      {% endfor %}
+    </nav>
+
     <div id="listing-grid" data-listing-view="list" class="mt-9 grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 {% if not listings %}hidden{% endif %}" aria-live="off">
       {% if listings %}
         {% for listing in listings %}

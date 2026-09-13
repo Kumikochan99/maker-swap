@@ -127,6 +127,37 @@ main section[id] {
   scroll-margin-top: 7rem;
 }
 
+.category-chip-nav {
+  overscroll-behavior-inline: contain;
+  scrollbar-color: #a8a29e transparent;
+  scrollbar-width: thin;
+}
+
+.category-pill {
+  flex: none;
+  border: 1px solid #d6d3d1;
+  border-radius: 9999px;
+  background: white;
+  color: #475569;
+  padding: 0.65rem 1rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  white-space: nowrap;
+  transition: 160ms ease;
+}
+
+.category-pill:hover {
+  border-color: #f97316;
+  color: #c2410c;
+}
+
+.category-pill-active,
+.category-pill-active:hover {
+  border-color: #0f172a;
+  background: #0f172a;
+  color: white;
+}
+
 .listing-card {
   box-shadow: 0 8px 28px rgb(15 23 42 / 5%);
   transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease;

@@ -140,7 +140,9 @@ def test_category_filter_preserves_catalogue_scroll_position(
     expect(page.locator("#category-menu-toggle")).to_have_attribute(
         "aria-expanded", "true"
     )
-    electronics = page.get_by_role("link", name="Electronics", exact=True)
+    electronics = page.locator(".site-dropdown-panel").get_by_role(
+        "link", name="Electronics", exact=True
+    )
     assert electronics.get_attribute("href").endswith(
         "/?category=Electronics#listings"
     )
@@ -223,7 +225,9 @@ def test_gallery_preference_survives_category_filtering(
     )
 
     page.locator("#category-menu-toggle").click()
-    page.get_by_role("link", name="Electronics", exact=True).click()
+    page.locator(".site-dropdown-panel").get_by_role(
+        "link", name="Electronics", exact=True
+    ).click()
     page.wait_for_url(re.compile(r"\?category=Electronics#listings$"))
 
     expect(page.locator("#listing-grid")).to_have_attribute(
@@ -237,6 +241,57 @@ def test_gallery_preference_survives_category_filtering(
     expect(page.get_by_role("button", name="Gallery view")).to_have_attribute(
         "aria-pressed", "true"
     )
+    page.context.close()
+
+
+def test_category_chips_and_dropdown_stay_synchronized(
+    browser: Browser,
+    browser_base_url: str,
+) -> None:
+    page = open_page(browser, browser_base_url)
+    chips = page.locator(".category-chip-nav")
+    dropdown = page.locator(".site-dropdown-panel")
+
+    expect(chips.get_by_role("link", name="All", exact=True)).to_have_attribute(
+        "aria-current", "page"
+    )
+    page.locator("#category-menu-toggle").click()
+    expect(
+        dropdown.get_by_role("link", name="All Listings", exact=True)
+    ).to_have_attribute("aria-current", "page")
+    page.keyboard.press("Escape")
+
+    chips.get_by_role("link", name="Electronics", exact=True).click()
+    page.wait_for_url(re.compile(r"\?category=Electronics#listings$"))
+    expect(page.locator("#listing-grid > [data-listing-id]")).to_have_count(4)
+    expect(
+        page.locator(".category-chip-nav").get_by_role(
+            "link", name="Electronics", exact=True
+        )
+    ).to_have_attribute("aria-current", "page")
+    page.locator("#category-menu-toggle").click()
+    expect(
+        page.locator(".site-dropdown-panel").get_by_role(
+            "link", name="Electronics", exact=True
+        )
+    ).to_have_attribute("aria-current", "page")
+
+    page.locator(".site-dropdown-panel").get_by_role(
+        "link", name="Art Supplies", exact=True
+    ).click()
+    page.wait_for_url(re.compile(r"\?category=Art(%20|\+)%26(%20|\+)Craft#listings$"))
+    expect(page.locator("#listing-grid > [data-listing-id]")).to_have_count(3)
+    expect(
+        page.locator(".category-chip-nav").get_by_role(
+            "link", name="Art & Craft", exact=True
+        )
+    ).to_have_attribute("aria-current", "page")
+    page.locator("#category-menu-toggle").click()
+    expect(
+        page.locator(".site-dropdown-panel").get_by_role(
+            "link", name="Art Supplies", exact=True
+        )
+    ).to_have_attribute("aria-current", "page")
     page.context.close()
 
 
@@ -408,7 +463,7 @@ def test_glass_navigation_remains_legible_across_page_backgrounds(
     page.locator("#category-menu-toggle").click()
     panel = page.locator(".site-dropdown-panel")
     expect(panel).to_be_visible()
-    expect(page.get_by_role("link", name="All Listings", exact=True)).to_be_visible()
+    expect(panel.get_by_role("link", name="All Listings", exact=True)).to_be_visible()
     panel_state = panel.evaluate(
         """element => {
             const style = getComputedStyle(element);

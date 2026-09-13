@@ -57,14 +57,18 @@ def run_reviewer_flow(page: Page) -> dict[str, object]:
     expect(page.locator("#category-menu-toggle")).to_have_attribute(
         "aria-expanded", "true"
     )
-    page.get_by_role("link", name="Electronics", exact=True).click()
+    page.locator(".site-dropdown-panel").get_by_role(
+        "link", name="Electronics", exact=True
+    ).click()
     page.wait_for_url(re.compile(r"\?category=Electronics#listings$"))
     expect(page.locator("#listing-grid > [data-listing-id]")).to_have_count(4)
     category_scroll_y = page.evaluate("window.scrollY")
     assert category_scroll_y > 0
 
     page.locator("#category-menu-toggle").click()
-    page.get_by_role("link", name="All Listings", exact=True).click()
+    page.locator(".site-dropdown-panel").get_by_role(
+        "link", name="All Listings", exact=True
+    ).click()
     page.wait_for_url(re.compile(r"/#listings$"))
     expect(page.locator("#listing-grid > [data-listing-id]")).to_have_count(16)
 

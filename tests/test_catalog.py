@@ -56,7 +56,7 @@ def test_browse_page_renders_every_listing() -> None:
     assert response.text.count('data-listing-status="Sold"') == 1
 
 
-def test_fixed_navigation_is_the_only_category_control() -> None:
+def test_browse_page_has_navigation_and_on_page_category_controls() -> None:
     response = client.get("/")
 
     assert response.status_code == 200
@@ -69,8 +69,33 @@ def test_fixed_navigation_is_the_only_category_control() -> None:
     assert ">Instruments</a>" in response.text
     assert ">Art Supplies</a>" in response.text
     assert ">Workshop Tools</a>" in response.text
-    assert "category-pill" not in response.text
+    assert 'aria-label="Browse-page categories"' in response.text
+    assert response.text.count('class="category-pill ') == 6
+    assert (
+        'class="category-pill category-pill-active" aria-current="page">All</a>'
+        in response.text
+    )
+    assert response.text.count("?category=Electronics#listings\"") == 2
     assert ">Browse</a>" not in response.text
+
+
+def test_category_controls_reflect_the_same_active_filter() -> None:
+    response = client.get("/", params={"category": "Electronics"})
+
+    assert response.status_code == 200
+    assert (
+        'href="http://testserver/?category=Electronics#listings" '
+        'class="site-dropdown-link block rounded-2xl px-4 py-2.5 text-sm '
+        'font-semibold text-slate-700" aria-current="page">Electronics</a>'
+    ) in response.text
+    assert (
+        'href="http://testserver/?category=Electronics#listings" '
+        'class="category-pill category-pill-active" aria-current="page"'
+    ) in response.text
+    assert (
+        'class="category-pill category-pill-active" aria-current="page">All</a>'
+        not in response.text
+    )
 
 
 def test_browse_page_defaults_to_the_existing_list_layout_with_view_controls() -> None:
