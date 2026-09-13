@@ -34,6 +34,6 @@ def test_notes_page_is_real_and_truthful() -> None:
     assert "16 seeded listings" in response.text
     assert "openai/text-embedding-3-small" in response.text
     assert "openai/gpt-4o-mini" in response.text
-    assert "gpt-5.6-terra" in response.text
+    assert "gpt-5.6-sol max" in response.text
     assert "Budget language is approximate." in response.text
     assert "CLASSGW_KEY" not in response.text
