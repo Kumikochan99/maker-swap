@@ -321,6 +321,48 @@ def test_search_api_returns_unchanged_listing_objects() -> None:
     assert stub.queries == ["Electronics repair"]
 
 
+def test_search_api_excludes_unavailable_matches_from_beginner_budget_query() -> None:
+    listings_by_id = {listing.id: listing for listing in load_listings()}
+    matches = (
+        SimpleNamespace(
+            listing=listings_by_id["arduino-sensor-starter-kit"],
+            score=0.98,
+        ),
+        SimpleNamespace(
+            listing=listings_by_id["raspberry-pi-4-workbench"],
+            score=0.94,
+        ),
+        SimpleNamespace(
+            listing=listings_by_id["original-prusa-mini-plus"],
+            score=0.88,
+        ),
+        SimpleNamespace(
+            listing=listings_by_id["bambu-lab-a1-mini"],
+            score=0.84,
+        ),
+    )
+    stub = StubSearch(result=matches)
+    override_search(stub)
+
+    response = client.post(
+        "/api/search",
+        json={"query": "beginner setup under $150"},
+    )
+
+    assert response.status_code == 200
+    results = response.json()["results"]
+    assert [result["id"] for result in results] == [
+        "raspberry-pi-4-workbench",
+        "original-prusa-mini-plus",
+    ]
+    assert all(result["status"] == "Available" for result in results)
+    assert "arduino-sensor-starter-kit" not in {
+        result["id"] for result in results
+    }
+    assert "bambu-lab-a1-mini" not in {result["id"] for result in results}
+    assert stub.queries == ["beginner setup under $150"]
+
+
 @pytest.mark.parametrize(
     "body",
     [

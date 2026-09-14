@@ -156,7 +156,11 @@ def search_catalogue(
 
     return SearchResponse(
         query=payload.query,
-        results=tuple(match.listing for match in matches),
+        results=tuple(
+            match.listing
+            for match in matches
+            if match.listing.status == "Available"
+        ),
     )
 
 
