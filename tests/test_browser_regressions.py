@@ -375,6 +375,85 @@ def test_nav_search_reuses_main_search_and_scrolls_to_its_results(
     page.context.close()
 
 
+def test_suggested_query_chip_submits_through_existing_search_flow(
+    browser: Browser,
+    browser_base_url: str,
+) -> None:
+    page = open_page(browser, browser_base_url)
+    listing = load_listings()[4]
+    submitted_queries: list[str] = []
+
+    def answer_search(route) -> None:
+        query = route.request.post_data_json["query"]
+        submitted_queries.append(query)
+        route.fulfill(
+            status=200,
+            content_type="application/json",
+            body=json.dumps(
+                {"query": query, "results": [listing.model_dump(mode="json")]}
+            ),
+        )
+
+    page.route("**/api/search", answer_search)
+    suggestion = page.get_by_role(
+        "button", name="Tools for electronics repair", exact=True
+    )
+    suggestion.click()
+
+    expect(page.locator("#catalogue-search-query")).to_have_value(
+        "Tools for electronics repair"
+    )
+    expect(page.locator("#catalogue-heading")).to_have_text("AI search matches")
+    expect(page.locator("#listing-grid > [data-listing-id]")).to_have_count(1)
+    expect(page.locator("#listing-grid > [data-listing-id]")).to_have_attribute(
+        "data-listing-id", listing.id
+    )
+    assert submitted_queries == ["Tools for electronics repair"]
+    page.context.close()
+
+
+@pytest.mark.parametrize("width,height", [(390, 844), (430, 932)])
+def test_suggested_query_chips_wrap_inside_search_panel_on_mobile(
+    browser: Browser,
+    browser_base_url: str,
+    width: int,
+    height: int,
+) -> None:
+    page = open_page(
+        browser,
+        browser_base_url,
+        viewport={"width": width, "height": height},
+    )
+    panel = page.locator(".search-panel")
+    suggestions = page.locator("[data-suggested-query]")
+
+    expect(suggestions).to_have_count(3)
+    panel_box = panel.bounding_box()
+    suggestion_boxes = suggestions.evaluate_all(
+        """elements => elements.map((element) => {
+            const rect = element.getBoundingClientRect();
+            return {x: rect.x, y: rect.y, width: rect.width, height: rect.height};
+        })"""
+    )
+    assert panel_box is not None
+    assert len({round(box["y"]) for box in suggestion_boxes}) >= 2
+    for box in suggestion_boxes:
+        assert box["x"] >= panel_box["x"]
+        assert box["x"] + box["width"] <= panel_box["x"] + panel_box["width"] + 1
+        assert box["height"] >= 40
+
+    dimensions = page.evaluate(
+        """() => ({
+            viewport: window.innerWidth,
+            document: document.documentElement.scrollWidth,
+            body: document.body.scrollWidth,
+        })"""
+    )
+    assert dimensions["document"] <= dimensions["viewport"] + 1
+    assert dimensions["body"] <= dimensions["viewport"] + 1
+    page.context.close()
+
+
 def test_nav_search_from_detail_returns_to_the_same_home_search_flow(
     browser: Browser,
     browser_base_url: str,

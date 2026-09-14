@@ -125,6 +125,12 @@
                 <span data-search-button-label>Find matches</span>
               </button>
             </div>
+            <div class="mt-3 flex flex-wrap items-center gap-2" role="group" aria-labelledby="suggested-searches-label">
+              <span id="suggested-searches-label" class="mr-1 text-xs font-bold uppercase tracking-[0.14em] text-slate-400">Try a search</span>
+              <button type="button" class="min-h-10 max-w-full rounded-full border border-slate-600 bg-slate-800 px-3 py-2 text-left text-xs font-semibold leading-5 text-slate-200 transition hover:border-orange-400 hover:bg-slate-700 hover:text-white" data-suggested-query="Beginner setup under $150">Beginner setup under $150</button>
+              <button type="button" class="min-h-10 max-w-full rounded-full border border-slate-600 bg-slate-800 px-3 py-2 text-left text-xs font-semibold leading-5 text-slate-200 transition hover:border-orange-400 hover:bg-slate-700 hover:text-white" data-suggested-query="Portable gear in excellent condition">Portable gear in excellent condition</button>
+              <button type="button" class="min-h-10 max-w-full rounded-full border border-slate-600 bg-slate-800 px-3 py-2 text-left text-xs font-semibold leading-5 text-slate-200 transition hover:border-orange-400 hover:bg-slate-700 hover:text-white" data-suggested-query="Tools for electronics repair">Tools for electronics repair</button>
+            </div>
           </form>
           <div class="mt-3 flex min-h-7 flex-wrap items-start justify-between gap-3">
             <p id="search-status" class="search-status text-sm leading-6 text-slate-300" role="status" aria-live="polite"></p>
@@ -240,5 +246,5 @@
 {% block scripts %}
 <script src="{{ url_for('static', path='/featured-carousel.js') }}?v=hero-carousel-2" defer></script>
 <script src="{{ url_for('static', path='/catalogue-view.js') }}?v=gallery-view-1" defer></script>
-<script src="{{ url_for('static', path='/search.js') }}?v=polish-status-1" defer></script>
+<script src="{{ url_for('static', path='/search.js') }}?v=suggested-queries-1" defer></script>
 {% endblock %}
