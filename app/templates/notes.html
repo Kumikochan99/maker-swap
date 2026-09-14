@@ -58,7 +58,7 @@
             Maker Swap is a public, mobile-responsive second-hand marketplace demo for makers and hobbyists in Singapore: people looking for equipment for 3D printing, electronics, music, art and workshop projects without buying everything new. It was built for the CognitioLabs Associate Forward Deployed Engineer assessment, so the goal is to demonstrate a coherent end-to-end product rather than imitate a production marketplace.
           </p>
           <p>
-            A visitor starts with a rotating four-category hero on the landing page, can browse all five catalogue categories, filter from either the fixed glass navigation or visible on-page category chips, and switch between the default detailed listing cards and a compact image-forward catalogue gallery. Each item opens a detail page with its own illustrated carousel and structured specifications. Visitors can also describe a need in natural language and ask follow-up questions in the floating catalogue assistant. Static availability badges distinguish available, reserved and sold seeds. The entire flow is available without an account, and the reviewer does not need to supply an AI key.
+            A visitor starts with a rotating four-category hero on the landing page, can browse all five catalogue categories, filter from either the fixed glass navigation or visible on-page category chips, and switch between the default detailed listing cards and a compact image-forward catalogue gallery. Each item opens a detail page with its own illustrated carousel and structured specifications; Available items also expose a one-screen simulated pickup checkout. Visitors can describe a need in natural language and ask follow-up questions in the floating catalogue assistant. Static availability badges distinguish available, reserved and sold seeds. The entire flow is available without an account, and the reviewer does not need to supply an AI key.
           </p>
           <p>
             The application is one FastAPI service on Render. FastAPI reads the catalogue into memory and serves Jinja2 HTML directly; Tailwind CSS is loaded from its CDN. There is no React application, Node build, separate front-end deployment or database. That deliberately small stack left more of the 72-hour window for search relevance, grounded answers and the user-facing flow.
@@ -90,7 +90,11 @@
           </li>
           <li class="rounded-2xl bg-stone-50 p-5">
             <strong class="block text-base text-slate-950">Availability is static</strong>
-            <span class="mt-1 block">The seed data marks 13 listings Available, two Reserved and one Sold. These badges do not change in the browser and are not backed by an order, reservation or inventory workflow.</span>
+            <span class="mt-1 block">The seed data marks 13 listings Available, two Reserved and one Sold. Reserved and Sold items cannot open the simulated checkout, and confirming an Available item does not change any badge or catalogue record.</span>
+          </li>
+          <li class="rounded-2xl bg-stone-50 p-5">
+            <strong class="block text-base text-slate-950">Checkout is fully simulated</strong>
+            <span class="mt-1 block">The detail-page dialog repeats the seeded item, price, condition and pickup area, then generates a page-only reference number. It sends no order request, collects no address or payment details, processes no real payment and stores no reservation.</span>
           </li>
           <li class="rounded-2xl bg-stone-50 p-5">
             <strong class="block text-base text-slate-950">There is no persistent inventory</strong>
@@ -168,8 +172,8 @@
             <p class="text-sm leading-6 text-slate-600">No login, saved profile or real seller identity. Public access is part of the assessment bar, and identity infrastructure would not improve the browse, search or Q&amp;A demonstration.</p>
           </div>
           <div class="grid gap-2 border-b border-stone-200 p-5 sm:grid-cols-[12rem_1fr] sm:gap-6">
-            <h3 class="font-bold text-slate-950">Payments and checkout</h3>
-            <p class="text-sm leading-6 text-slate-600">No cart, payment processor or interactive order state. Reserved and Sold are fixed seed labels only; a fake checkout or editable reservation would imply transaction capability that does not exist, while real payment work is explicitly outside the brief.</p>
+            <h3 class="font-bold text-slate-950">Real payments and orders</h3>
+            <p class="text-sm leading-6 text-slate-600">The single-screen checkout is a clearly labelled interface simulation, not an order system. There is no cart, payment processor, order endpoint, persistent reservation or inventory mutation. Real transaction work is outside the brief, and the assessment time was focused on useful search relevance and grounded Q&amp;A accuracy instead.</p>
           </div>
           <div class="grid gap-2 border-b border-stone-200 bg-stone-50 p-5 sm:grid-cols-[12rem_1fr] sm:gap-6">
             <h3 class="font-bold text-slate-950">Messaging and logistics</h3>
@@ -208,7 +212,7 @@
             <strong class="text-slate-950">Q&amp;A cannot know what the seeds do not say.</strong> It has no evidence for warranties, policies, seller details, exact availability beyond the current demo records, or facts outside the catalogue. Refusing those questions is intended behavior, not hidden completion.
           </li>
           <li class="border-l-2 border-amber-400 pl-4">
-            <strong class="text-slate-950">This stops before a transaction.</strong> Browse, detail galleries, static status display, search and catalogue Q&amp;A are implemented; contacting a seller, changing a reservation or sold status, paying and arranging delivery remain deliberately unbuilt. The demo should not be mistaken for a production marketplace.
+            <strong class="text-slate-950">This stops before a real transaction.</strong> The checkout review and confirmation are simulated entirely in the current page. Contacting a seller, creating or retrieving an order, changing a reservation or sold status, paying and arranging delivery remain deliberately unbuilt. The demo should not be mistaken for a production marketplace.
           </li>
         </ul>
       </section>

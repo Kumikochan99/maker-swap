@@ -39,5 +39,8 @@ def test_notes_page_is_real_and_truthful() -> None:
     assert "Budget language is approximate." in response.text
     assert "13 listings Available, two Reserved and one Sold" in response.text
     assert "representative artwork shared within a category" in response.text
-    assert "fixed seed labels only" in response.text
+    assert "Checkout is fully simulated" in response.text
+    assert "processes no real payment and stores no reservation" in response.text
+    assert "order endpoint, persistent reservation or inventory mutation" in response.text
+    assert "grounded Q&amp;A accuracy instead" in response.text
     assert "CLASSGW_KEY" not in response.text

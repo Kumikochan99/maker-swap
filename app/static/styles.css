@@ -413,6 +413,29 @@ main section[id] {
   opacity: 1;
 }
 
+.simulated-checkout-dialog {
+  width: min(38rem, calc(100vw - 2rem));
+  max-height: calc(100dvh - 2rem);
+  margin: auto;
+  padding: 0;
+  overflow-y: auto;
+  border: 1px solid #d6d3d1;
+  border-radius: 2rem;
+  background: #fff7ed;
+  color: #0f172a;
+  box-shadow: 0 30px 90px rgb(15 23 42 / 32%);
+}
+
+.simulated-checkout-dialog::backdrop {
+  background: rgb(15 23 42 / 62%);
+  -webkit-backdrop-filter: blur(5px);
+  backdrop-filter: blur(5px);
+}
+
+body.simulated-checkout-open {
+  overflow: hidden;
+}
+
 .catalogue-chat-widget {
   position: fixed;
   right: max(1rem, env(safe-area-inset-right));
@@ -545,6 +568,12 @@ main section[id] {
 
   .hero-intro-heading {
     font-size: clamp(2.25rem, 10vw, 2.6rem);
+  }
+
+  .simulated-checkout-dialog {
+    width: calc(100vw - 1.5rem);
+    max-height: calc(100dvh - 1.5rem);
+    border-radius: 1.5rem;
   }
 
   body.catalogue-chat-open {

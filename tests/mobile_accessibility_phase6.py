@@ -469,6 +469,50 @@ def verify_viewport(
         full_page=False,
     )
 
+    checkout_trigger = page.get_by_role("button", name="Simulated Buy / Reserve")
+    checkout_trigger.scroll_into_view_if_needed()
+    checkout_trigger.click()
+    checkout_dialog = page.locator("#simulated-checkout-dialog")
+    expect(checkout_dialog).to_be_visible()
+    checkout_box = checkout_dialog.bounding_box()
+    assert checkout_box is not None
+    assert checkout_box["x"] >= 0
+    assert checkout_box["y"] >= 0
+    assert checkout_box["x"] + checkout_box["width"] <= viewport["width"] + 1
+    assert checkout_box["y"] + checkout_box["height"] <= viewport["height"] + 1
+    expect(checkout_dialog).to_contain_text("Original Prusa MINI+")
+    expect(checkout_dialog).to_contain_text("Good")
+    expect(checkout_dialog).to_contain_text("S$420")
+    expect(checkout_dialog).to_contain_text("Local pickup")
+    expect(checkout_dialog).to_contain_text("Jurong East")
+    expect(checkout_dialog).to_contain_text(
+        "This is a simulated demo checkout — no real payment is processed."
+    )
+    checkout_confirm = checkout_dialog.get_by_role("button", name="Confirm Order")
+    checkout_confirm.scroll_into_view_if_needed()
+    checkout_confirm_box = checkout_confirm.bounding_box()
+    assert checkout_confirm_box is not None
+    assert checkout_confirm_box["width"] >= 44
+    assert checkout_confirm_box["height"] >= 44
+    page.screenshot(
+        path=ARTIFACT_DIR / f"checkout-review-{viewport['width']}.png",
+        full_page=False,
+    )
+
+    checkout_confirm.click()
+    checkout_success = page.locator("[data-checkout-success]")
+    expect(checkout_success).to_be_visible()
+    expect(checkout_success).to_contain_text("Reservation Confirmed!")
+    expect(checkout_success).to_contain_text(re.compile(r"Reference #\d{6}"))
+    expect(page.locator('[data-status="Available"]')).to_be_visible()
+    page.screenshot(
+        path=ARTIFACT_DIR / f"checkout-success-{viewport['width']}.png",
+        full_page=False,
+    )
+    checkout_dialog.get_by_role("button", name="Done").click()
+    expect(checkout_dialog).to_be_hidden()
+    expect(checkout_trigger).to_be_focused()
+
     page.locator("#catalogue-chat-toggle").click()
     panel_box = assert_inside_viewport(page, "#catalogue-chat-panel")
     expect(page.get_by_label("Ask a question about the catalogue")).to_be_visible()
@@ -517,6 +561,13 @@ def verify_viewport(
             "manual_advance": True,
             "active_slide_geometry": featured_geometry,
             "horizontal_overflow": False,
+        },
+        "simulated_checkout": {
+            "review_dialog": checkout_box,
+            "confirm_target": checkout_confirm_box,
+            "summary_fields": True,
+            "success_reference": True,
+            "status_unchanged": True,
         },
         "contrast_ratios": {
             name: round(ratio, 2) for name, ratio in contrast.items()

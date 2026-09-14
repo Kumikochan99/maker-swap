@@ -197,7 +197,35 @@ def test_listing_detail_uses_plain_pickup_area_data() -> None:
     assert 'href="http://testserver/#listings"' in response.text
     assert 'data-catalogue-url="http://testserver/#listings"' in response.text
     assert "data-listing-card" in response.text
-    assert 'src="http://testserver/static/detail.js?v=gallery-1"' in response.text
+    assert (
+        'src="http://testserver/static/detail.js?v=simulated-checkout-1"'
+        in response.text
+    )
+
+
+def test_available_listing_has_a_form_free_simulated_checkout_summary() -> None:
+    response = client.get("/listings/original-prusa-mini-plus")
+
+    assert response.status_code == 200
+    assert 'id="simulated-checkout-open"' in response.text
+    assert "Simulated Buy / Reserve" in response.text
+    assert 'id="simulated-checkout-dialog"' in response.text
+    assert "Original Prusa MINI+" in response.text
+    assert "Good" in response.text
+    assert "S$420" in response.text
+    assert "Local pickup" in response.text
+    assert "Jurong East" in response.text
+    assert (
+        "This is a simulated demo checkout &mdash; no real payment is processed."
+        in response.text
+    )
+    assert "Confirm Order" in response.text
+    checkout_markup = response.text.split(
+        '<dialog\n          id="simulated-checkout-dialog"', 1
+    )[1].split("</dialog>", 1)[0]
+    assert "<form" not in checkout_markup
+    assert "<input" not in checkout_markup
+    assert "<select" not in checkout_markup
 
 
 def test_listing_detail_renders_gallery_specs_and_static_status() -> None:
@@ -209,11 +237,15 @@ def test_listing_detail_renders_gallery_specs_and_static_status() -> None:
     assert "data-gallery-main" in reserved.text
     assert "Build volume" in reserved.text
     assert 'data-status="Reserved"' in reserved.text
+    assert "data-checkout-open" not in reserved.text
+    assert "data-checkout-dialog" not in reserved.text
     assert "There is no seller messaging or interactive reservation flow." in reserved.text
     assert "not photographs of a seller's item" in reserved.text
 
     assert sold.status_code == 200
     assert 'data-status="Sold"' in sold.text
+    assert "data-checkout-open" not in sold.text
+    assert "data-checkout-dialog" not in sold.text
     assert "stays visible as catalogue history" in sold.text
     assert "There is no seller profile, messaging or purchase flow." in sold.text
 

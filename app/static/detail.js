@@ -77,4 +77,79 @@ document.addEventListener("DOMContentLoaded", () => {
 
     showImage(currentIndex, { announce: false });
   });
+
+  const checkoutDialog = document.querySelector("[data-checkout-dialog]");
+  const checkoutTrigger = document.querySelector("[data-checkout-open]");
+  const checkoutHeading = checkoutDialog?.querySelector("[data-checkout-heading]");
+  const checkoutReview = checkoutDialog?.querySelector("[data-checkout-review]");
+  const checkoutSuccess = checkoutDialog?.querySelector("[data-checkout-success]");
+  const checkoutConfirm = checkoutDialog?.querySelector("[data-checkout-confirm]");
+  const checkoutReference = checkoutDialog?.querySelector("[data-checkout-reference]");
+  const checkoutCloseButtons = checkoutDialog?.querySelectorAll(
+    "[data-checkout-close], [data-checkout-done]",
+  );
+
+  if (
+    checkoutDialog instanceof HTMLDialogElement &&
+    checkoutTrigger instanceof HTMLButtonElement &&
+    checkoutHeading &&
+    checkoutReview &&
+    checkoutSuccess &&
+    checkoutConfirm instanceof HTMLButtonElement &&
+    checkoutReference &&
+    checkoutCloseButtons
+  ) {
+    const referenceNumber = () => {
+      let value = Date.now();
+      if (window.crypto && typeof window.crypto.getRandomValues === "function") {
+        const randomValue = new Uint32Array(1);
+        window.crypto.getRandomValues(randomValue);
+        value = randomValue[0];
+      }
+      return String(100000 + (value % 900000));
+    };
+
+    const resetCheckout = () => {
+      checkoutHeading.textContent = "Review your pickup";
+      checkoutReview.hidden = false;
+      checkoutSuccess.hidden = true;
+      checkoutReference.textContent = "";
+      checkoutDialog.setAttribute(
+        "aria-describedby",
+        "simulated-checkout-notice",
+      );
+    };
+
+    checkoutTrigger.addEventListener("click", () => {
+      resetCheckout();
+      checkoutDialog.showModal();
+      document.body.classList.add("simulated-checkout-open");
+      checkoutConfirm.focus();
+    });
+
+    checkoutConfirm.addEventListener("click", () => {
+      checkoutReference.textContent = referenceNumber();
+      checkoutReview.hidden = true;
+      checkoutSuccess.hidden = false;
+      checkoutHeading.textContent = "Checkout complete";
+      checkoutDialog.setAttribute(
+        "aria-describedby",
+        "simulated-checkout-success-detail",
+      );
+      checkoutSuccess.focus({ preventScroll: true });
+    });
+
+    checkoutCloseButtons.forEach((button) => {
+      button.addEventListener("click", () => checkoutDialog.close());
+    });
+
+    checkoutDialog.addEventListener("click", (event) => {
+      if (event.target === checkoutDialog) checkoutDialog.close();
+    });
+
+    checkoutDialog.addEventListener("close", () => {
+      document.body.classList.remove("simulated-checkout-open");
+      checkoutTrigger.focus();
+    });
+  }
 });

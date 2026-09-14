@@ -694,6 +694,114 @@ def test_glass_navigation_remains_legible_across_page_backgrounds(
     page.context.close()
 
 
+def test_simulated_checkout_confirms_without_network_or_catalogue_mutation(
+    browser: Browser,
+    browser_base_url: str,
+) -> None:
+    page = open_page(
+        browser,
+        browser_base_url,
+        "/listings/original-prusa-mini-plus",
+    )
+    trigger = page.get_by_role("button", name="Simulated Buy / Reserve")
+    dialog = page.locator("#simulated-checkout-dialog")
+
+    expect(trigger).to_be_visible()
+    expect(dialog).to_be_hidden()
+    trigger.focus()
+    trigger.press("Enter")
+    expect(dialog).to_be_visible()
+    expect(dialog).to_have_attribute("open", "")
+    expect(page.locator("body")).to_have_class(re.compile("simulated-checkout-open"))
+    expect(dialog.get_by_role("heading", name="Review your pickup")).to_be_visible()
+    expect(dialog).to_contain_text("Original Prusa MINI+")
+    expect(dialog).to_contain_text("Good")
+    expect(dialog).to_contain_text("S$420")
+    expect(dialog).to_contain_text("Local pickup")
+    expect(dialog).to_contain_text("Jurong East")
+    expect(dialog).to_contain_text(
+        "This is a simulated demo checkout — no real payment is processed."
+    )
+    expect(dialog.locator("form, input, select, textarea")).to_have_count(0)
+
+    page.keyboard.press("Escape")
+    expect(dialog).to_be_hidden()
+    expect(trigger).to_be_focused()
+
+    requests_after_open: list[str] = []
+    page.on("request", lambda request: requests_after_open.append(request.url))
+    trigger.click()
+    dialog.get_by_role("button", name="Confirm Order").click()
+    expect(page.locator("[data-checkout-review]")).to_be_hidden()
+    success = page.locator("[data-checkout-success]")
+    expect(success).to_be_visible()
+    expect(success).to_contain_text("Reservation Confirmed!")
+    expect(success).to_contain_text(re.compile(r"Reference #\d{6}"))
+    expect(page.locator('[data-status="Available"]')).to_be_visible()
+    assert requests_after_open == []
+
+    dialog.get_by_role("button", name="Done").click()
+    expect(dialog).to_be_hidden()
+    expect(trigger).to_be_focused()
+    page.reload(wait_until="networkidle")
+    expect(page.locator('[data-status="Available"]')).to_be_visible()
+    expect(page.get_by_role("button", name="Simulated Buy / Reserve")).to_be_visible()
+    page.context.close()
+
+
+@pytest.mark.parametrize("width,height", [(390, 844), (430, 932)])
+def test_simulated_checkout_fits_mobile_viewports(
+    browser: Browser,
+    browser_base_url: str,
+    width: int,
+    height: int,
+) -> None:
+    page = open_page(
+        browser,
+        browser_base_url,
+        "/listings/original-prusa-mini-plus",
+        {"width": width, "height": height},
+    )
+    trigger = page.get_by_role("button", name="Simulated Buy / Reserve")
+    trigger.scroll_into_view_if_needed()
+    trigger.click()
+
+    dialog = page.locator("#simulated-checkout-dialog")
+    expect(dialog).to_be_visible()
+    dialog_box = dialog.bounding_box()
+    assert dialog_box is not None
+    assert dialog_box["x"] >= 0
+    assert dialog_box["y"] >= 0
+    assert dialog_box["x"] + dialog_box["width"] <= width + 1
+    assert dialog_box["y"] + dialog_box["height"] <= height + 1
+    dialog_dimensions = dialog.evaluate(
+        """element => ({
+            clientWidth: element.clientWidth,
+            scrollWidth: element.scrollWidth,
+            clientHeight: element.clientHeight,
+            scrollHeight: element.scrollHeight,
+        })"""
+    )
+    assert dialog_dimensions["scrollWidth"] <= dialog_dimensions["clientWidth"] + 1
+
+    confirm = dialog.get_by_role("button", name="Confirm Order")
+    confirm.scroll_into_view_if_needed()
+    confirm_box = confirm.bounding_box()
+    assert confirm_box is not None
+    assert confirm_box["width"] >= 44
+    assert confirm_box["height"] >= 44
+    confirm.click()
+    expect(page.locator("[data-checkout-success]")).to_be_visible()
+    done = dialog.get_by_role("button", name="Done")
+    done_box = done.bounding_box()
+    assert done_box is not None
+    assert done_box["width"] >= 44
+    assert done_box["height"] >= 44
+    done.click()
+    expect(trigger).to_be_focused()
+    page.context.close()
+
+
 @pytest.mark.parametrize("width,height", [(390, 844), (430, 932)])
 def test_polished_navigation_and_gallery_fit_mobile_viewports(
     browser: Browser,
@@ -726,6 +834,8 @@ def test_polished_navigation_and_gallery_fit_mobile_viewports(
     page.keyboard.press("Escape")
 
     expect(page.locator('[data-status="Reserved"]')).to_be_visible()
+    expect(page.locator("[data-checkout-open]")).to_have_count(0)
+    expect(page.locator("[data-checkout-dialog]")).to_have_count(0)
     thumbnails = page.locator("[data-gallery-thumbnail]")
     expect(thumbnails).to_have_count(3)
     original_source = page.locator("[data-gallery-main]").get_attribute("src")
