@@ -68,7 +68,9 @@
     statusBadge.dataset.status = listingStatus;
     statusBadge.classList.toggle("hidden", listingStatus === "Available");
     card.querySelector("[data-card-category]").textContent = listing.category;
-    card.querySelector("[data-card-condition]").textContent = listing.condition;
+    const conditionBadge = card.querySelector("[data-card-condition]");
+    conditionBadge.textContent = listing.condition;
+    conditionBadge.dataset.condition = listing.condition;
     card.querySelector("[data-card-title]").textContent = listing.title;
     card.querySelector("[data-card-description]").textContent = listing.description;
     card.querySelector("[data-card-price]").textContent = `S$${money.format(listing.price)}`;

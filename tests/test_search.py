@@ -368,7 +368,10 @@ def test_browse_page_includes_async_search_states() -> None:
     assert 'id="catalogue-empty-state"' in response.text
     assert 'id="browse-all-items"' in response.text
     assert "data-suggested-query" not in response.text
-    assert 'src="http://testserver/static/search.js?v=polish-status-1"' in response.text
+    assert (
+        'src="http://testserver/static/search.js?v=condition-badges-1"'
+        in response.text
+    )
     assert "data-card-status" in response.text
     assert "data-listing-status" in response.text
     assert "CLASSGW_KEY" not in response.text

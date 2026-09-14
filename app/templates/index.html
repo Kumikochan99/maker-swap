@@ -190,7 +190,7 @@
               <div data-card-content class="flex min-h-64 flex-col p-5">
                 <div data-card-meta class="flex items-center justify-between gap-3 text-xs font-bold uppercase tracking-[0.12em]">
                   <span data-card-category class="text-orange-700">{{ listing.category }}</span>
-                  <span data-card-condition class="rounded-full bg-stone-100 px-2.5 py-1 text-slate-600">{{ listing.condition }}</span>
+                  <span data-card-condition data-condition="{{ listing.condition }}" class="listing-condition-badge rounded-full px-2.5 py-1">{{ listing.condition }}</span>
                 </div>
                 <h3 data-card-title class="mt-4 font-display text-xl font-bold leading-tight tracking-tight text-slate-950">{{ listing.title }}</h3>
                 <p data-card-description class="description-clamp mt-3 text-sm leading-6 text-slate-600">{{ listing.description }}</p>
@@ -221,7 +221,7 @@
           <div data-card-content class="flex min-h-64 flex-col p-5">
             <div data-card-meta class="flex items-center justify-between gap-3 text-xs font-bold uppercase tracking-[0.12em]">
               <span data-card-category class="text-orange-700"></span>
-              <span data-card-condition class="rounded-full bg-stone-100 px-2.5 py-1 text-slate-600"></span>
+              <span data-card-condition class="listing-condition-badge rounded-full px-2.5 py-1"></span>
             </div>
             <h3 data-card-title class="mt-4 font-display text-xl font-bold leading-tight tracking-tight text-slate-950"></h3>
             <p data-card-description class="description-clamp mt-3 text-sm leading-6 text-slate-600"></p>
@@ -240,5 +240,5 @@
 {% block scripts %}
 <script src="{{ url_for('static', path='/featured-carousel.js') }}?v=hero-carousel-2" defer></script>
 <script src="{{ url_for('static', path='/catalogue-view.js') }}?v=gallery-view-1" defer></script>
-<script src="{{ url_for('static', path='/search.js') }}?v=polish-status-1" defer></script>
+<script src="{{ url_for('static', path='/search.js') }}?v=condition-badges-1" defer></script>
 {% endblock %}

@@ -414,6 +414,41 @@ main section[id] {
   white-space: nowrap;
 }
 
+.listing-condition-badge {
+  border: 1px solid transparent;
+  white-space: nowrap;
+}
+
+.listing-condition-badge[data-condition="New in box"] {
+  border-color: #91ad98;
+  background: #dcebdd;
+  color: #254a32;
+}
+
+.listing-condition-badge[data-condition="Like new"] {
+  border-color: #a6b980;
+  background: #e4edd5;
+  color: #3e5724;
+}
+
+.listing-condition-badge[data-condition="Excellent"] {
+  border-color: #bdc091;
+  background: #edf0df;
+  color: #53602f;
+}
+
+.listing-condition-badge[data-condition="Good"] {
+  border-color: #ccb183;
+  background: #f3e8d5;
+  color: #6e522a;
+}
+
+.listing-condition-badge[data-condition="Fair"] {
+  border-color: #d0925a;
+  background: #f6ddc7;
+  color: #82451f;
+}
+
 .listing-status-badge {
   border: 1px solid transparent;
   font-size: 0.72rem;

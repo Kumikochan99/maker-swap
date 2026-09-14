@@ -54,7 +54,7 @@
         <div class="flex min-w-0 flex-col p-7 sm:p-10 lg:p-12 xl:p-14">
           <div class="flex flex-wrap items-center gap-3 text-xs font-bold uppercase tracking-[0.14em]">
             <span class="text-orange-700">{{ listing.category }}</span>
-            <span class="rounded-full bg-emerald-100 px-3 py-1.5 text-emerald-800">{{ listing.condition }}</span>
+            <span class="listing-condition-badge rounded-full px-3 py-1.5" data-condition="{{ listing.condition }}">{{ listing.condition }}</span>
             <span class="listing-status-badge rounded-full px-3 py-1.5" data-status="{{ listing.status }}">{{ listing.status }}</span>
           </div>
 

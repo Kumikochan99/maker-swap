@@ -15,6 +15,33 @@ from app.main import app
 
 
 EDGE_PATH = Path(r"C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe")
+CONDITION_COLORS = {
+    "New in box": {
+        "background": "rgb(220, 235, 221)",
+        "border": "rgb(145, 173, 152)",
+        "text": "rgb(37, 74, 50)",
+    },
+    "Like new": {
+        "background": "rgb(228, 237, 213)",
+        "border": "rgb(166, 185, 128)",
+        "text": "rgb(62, 87, 36)",
+    },
+    "Excellent": {
+        "background": "rgb(237, 240, 223)",
+        "border": "rgb(189, 192, 145)",
+        "text": "rgb(83, 96, 47)",
+    },
+    "Good": {
+        "background": "rgb(243, 232, 213)",
+        "border": "rgb(204, 177, 131)",
+        "text": "rgb(110, 82, 42)",
+    },
+    "Fair": {
+        "background": "rgb(246, 221, 199)",
+        "border": "rgb(208, 146, 90)",
+        "text": "rgb(130, 69, 31)",
+    },
+}
 
 
 @pytest.fixture(scope="module")
@@ -310,7 +337,19 @@ def test_clear_search_restores_the_full_catalogue(
     expect(page.locator("[data-card-status]")).to_have_text("Reserved")
     expect(page.locator('[data-listing-status="Reserved"]')).to_have_count(1)
     expect(page.locator("[data-card-description]")).to_be_hidden()
-    expect(page.locator("[data-card-condition]")).to_be_visible()
+    dynamic_condition = page.locator("[data-card-condition]")
+    expect(dynamic_condition).to_be_visible()
+    expect(dynamic_condition).to_have_attribute("data-condition", "Like new")
+    assert dynamic_condition.evaluate(
+        """element => {
+            const style = getComputedStyle(element);
+            return {
+                background: style.backgroundColor,
+                border: style.borderColor,
+                text: style.color,
+            };
+        }"""
+    ) == CONDITION_COLORS["Like new"]
 
     with page.expect_navigation(wait_until="domcontentloaded"):
         page.locator("#catalogue-search-clear").click()
@@ -933,6 +972,107 @@ def test_compact_catalogue_gallery_is_two_columns_and_readable_on_mobile(
     assert restored_state["columns"] == 1
     assert restored_state["cardWidth"] == pytest.approx(list_state["cardWidth"], abs=1)
     expect(first_card.locator("[data-card-description]")).to_be_visible()
+    page.context.close()
+
+
+@pytest.mark.parametrize("width,height", [(390, 844), (430, 932)])
+def test_condition_badges_are_distinct_and_legible_across_mobile_views(
+    browser: Browser,
+    browser_base_url: str,
+    width: int,
+    height: int,
+) -> None:
+    page = open_page(
+        browser,
+        browser_base_url,
+        "/#listings",
+        {"width": width, "height": height},
+    )
+    badges = page.locator("[data-card-condition]")
+    expect(badges).to_have_count(16)
+    rendered_conditions = badges.evaluate_all(
+        "elements => [...new Set(elements.map(element => element.dataset.condition))]"
+    )
+    assert sorted(rendered_conditions) == sorted(CONDITION_COLORS)
+
+    def verify_badges() -> None:
+        for condition, expected in CONDITION_COLORS.items():
+            badge = page.locator(
+                f'[data-card-condition][data-condition="{condition}"]'
+            ).first
+            expect(badge).to_be_visible()
+            state = badge.evaluate(
+                """element => {
+                    const style = getComputedStyle(element);
+                    const box = element.getBoundingClientRect();
+                    const card = element.closest('[data-listing-id]').getBoundingClientRect();
+                    return {
+                        background: style.backgroundColor,
+                        border: style.borderColor,
+                        text: style.color,
+                        clientWidth: element.clientWidth,
+                        scrollWidth: element.scrollWidth,
+                        box: {x: box.x, width: box.width, height: box.height},
+                        card: {x: card.x, width: card.width},
+                    };
+                }"""
+            )
+            assert {
+                "background": state["background"],
+                "border": state["border"],
+                "text": state["text"],
+            } == expected
+            assert contrast_ratio(
+                css_channels(state["text"])[:3],
+                css_channels(state["background"])[:3],
+            ) >= 4.5
+            assert state["scrollWidth"] <= state["clientWidth"] + 1
+            assert state["box"]["height"] >= 24
+            assert state["box"]["x"] >= state["card"]["x"]
+            assert (
+                state["box"]["x"] + state["box"]["width"]
+                <= state["card"]["x"] + state["card"]["width"] + 1
+            )
+
+    verify_badges()
+    first_card = page.locator('[data-listing-id="original-prusa-mini-plus"]')
+    assert first_card.evaluate("element => getComputedStyle(element).backgroundColor") == (
+        "rgb(255, 255, 255)"
+    )
+
+    page.get_by_role("button", name="Gallery view").click()
+    expect(page.locator("#listing-grid")).to_have_attribute(
+        "data-listing-view", "gallery"
+    )
+    verify_badges()
+    assert page.evaluate("document.documentElement.scrollWidth") <= width + 1
+
+    page.goto(f"{browser_base_url}/listings/bosch-router-table", wait_until="networkidle")
+    detail_badge = page.locator(
+        '.listing-condition-badge[data-condition="Fair"]'
+    )
+    expect(detail_badge).to_be_visible()
+    detail_state = detail_badge.evaluate(
+        """element => {
+            const style = getComputedStyle(element);
+            const box = element.getBoundingClientRect();
+            return {
+                background: style.backgroundColor,
+                border: style.borderColor,
+                text: style.color,
+                width: box.width,
+                height: box.height,
+                viewport: window.innerWidth,
+            };
+        }"""
+    )
+    assert {
+        "background": detail_state["background"],
+        "border": detail_state["border"],
+        "text": detail_state["text"],
+    } == CONDITION_COLORS["Fair"]
+    assert detail_state["width"] < detail_state["viewport"]
+    assert detail_state["height"] >= 28
     page.context.close()
 
 

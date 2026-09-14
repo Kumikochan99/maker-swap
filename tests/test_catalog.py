@@ -30,6 +30,13 @@ def test_seeded_catalog_is_valid_and_complete() -> None:
         "Reserved": 2,
         "Sold": 1,
     }
+    assert Counter(listing.condition for listing in listings) == {
+        "New in box": 1,
+        "Like new": 2,
+        "Excellent": 4,
+        "Good": 8,
+        "Fair": 1,
+    }
     assert all(2 <= len(listing.images) <= 4 for listing in listings)
     assert all(listing.images[0] == listing.image for listing in listings)
     assert all(len(listing.specs) >= 2 for listing in listings)
@@ -55,6 +62,31 @@ def test_browse_page_renders_every_listing() -> None:
     assert "A public second-hand maker marketplace demo" in response.text
     assert response.text.count('data-listing-status="Reserved"') == 2
     assert response.text.count('data-listing-status="Sold"') == 1
+
+
+def test_condition_badges_cover_browse_search_template_and_detail_pages() -> None:
+    browse = client.get("/")
+    expected_counts = Counter(listing.condition for listing in load_listings())
+
+    assert browse.status_code == 200
+    assert 'data-card-condition class="listing-condition-badge' in browse.text
+    for condition, count in expected_counts.items():
+        assert browse.text.count(f'data-condition="{condition}"') == count
+
+    representative_ids = {
+        "New in box": "pla-filament-bundle",
+        "Like new": "bambu-lab-a1-mini",
+        "Excellent": "hakko-fx888d-station",
+        "Good": "original-prusa-mini-plus",
+        "Fair": "bosch-router-table",
+    }
+    for condition, listing_id in representative_ids.items():
+        detail = client.get(f"/listings/{listing_id}")
+        assert detail.status_code == 200
+        assert (
+            'class="listing-condition-badge rounded-full px-3 py-1.5" '
+            f'data-condition="{condition}">{condition}</span>'
+        ) in detail.text
 
 
 def test_home_page_carousel_features_four_available_category_representatives() -> None:
@@ -129,7 +161,7 @@ def test_browse_page_has_navigation_and_on_page_category_controls() -> None:
     assert 'id="catalogue-search"' in response.text
     assert 'src="http://testserver/static/nav.js?v=nav-search-1"' in response.text
     assert (
-        'href="http://testserver/static/styles.css?v=nav-search-states-1"'
+        'href="http://testserver/static/styles.css?v=condition-badges-1"'
         in response.text
     )
 
