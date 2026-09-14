@@ -48,6 +48,42 @@ body {
   box-shadow: inset 0 1px 0 rgb(255 255 255 / 72%);
 }
 
+.nav-search-shell {
+  transition:
+    border-color 180ms ease,
+    background-color 180ms ease,
+    box-shadow 180ms ease;
+}
+
+#nav-search-query:focus,
+#nav-search-query:focus-visible {
+  outline: none;
+  outline-width: 0;
+  outline-offset: 0;
+  box-shadow: none;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .nav-search-shell:has(#nav-search-query:hover) {
+    border-color: rgb(194 65 12 / 55%);
+    background: rgb(255 247 237 / 88%);
+    box-shadow:
+      0 0 0 3px rgb(194 65 12 / 14%),
+      0 8px 22px rgb(154 52 18 / 15%),
+      inset 0 1px 0 rgb(255 255 255 / 78%);
+  }
+}
+
+.nav-search-shell:focus-within {
+  border-color: #526442;
+  background: rgb(247 250 239 / 92%);
+  box-shadow:
+    0 0 0 3px #526442,
+    0 0 0 7px rgb(107 125 87 / 24%),
+    0 8px 24px rgb(82 100 66 / 16%),
+    inset 0 1px 0 rgb(255 255 255 / 82%);
+}
+
 .nav-search-toggle,
 .nav-search-close {
   display: none;

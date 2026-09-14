@@ -375,6 +375,127 @@ def test_nav_search_reuses_main_search_and_scrolls_to_its_results(
     page.context.close()
 
 
+def test_nav_search_has_distinct_desktop_hover_and_focus_glows(
+    browser: Browser,
+    browser_base_url: str,
+) -> None:
+    page = open_page(browser, browser_base_url)
+    nav_input = page.locator("#nav-search-query")
+    nav_shell = page.locator(".nav-search-shell")
+
+    def shell_style() -> dict[str, str]:
+        return nav_shell.evaluate(
+            """element => {
+                const style = getComputedStyle(element);
+                return {
+                    backgroundColor: style.backgroundColor,
+                    borderColor: style.borderColor,
+                    boxShadow: style.boxShadow,
+                };
+            }"""
+        )
+
+    resting_style = shell_style()
+    nav_input.hover()
+    page.wait_for_timeout(250)
+    hover_style = shell_style()
+    assert hover_style["boxShadow"] != resting_style["boxShadow"]
+    assert hover_style["borderColor"] != resting_style["borderColor"]
+    assert "194, 65, 12" in hover_style["borderColor"]
+
+    nav_input.click()
+    page.mouse.move(0, 400)
+    page.wait_for_timeout(250)
+    expect(nav_input).to_be_focused()
+    focus_style = shell_style()
+    input_focus_style = nav_input.evaluate(
+        """element => {
+            const style = getComputedStyle(element);
+            return {
+                outlineStyle: style.outlineStyle,
+                outlineWidth: style.outlineWidth,
+                boxShadow: style.boxShadow,
+            };
+        }"""
+    )
+    assert focus_style["boxShadow"] != hover_style["boxShadow"]
+    assert focus_style["borderColor"] == "rgb(82, 100, 66)"
+    assert "rgb(82, 100, 66)" in focus_style["boxShadow"]
+    assert contrast_ratio((82, 100, 66), (247, 250, 239)) >= 3
+    assert input_focus_style == {
+        "outlineStyle": "none",
+        "outlineWidth": "0px",
+        "boxShadow": "none",
+    }
+
+    main_input = page.locator("#catalogue-search-query")
+    main_input.focus()
+    main_focus_style = main_input.evaluate(
+        """element => {
+            const style = getComputedStyle(element);
+            return {
+                outlineColor: style.outlineColor,
+                outlineStyle: style.outlineStyle,
+                outlineWidth: style.outlineWidth,
+            };
+        }"""
+    )
+    assert main_focus_style == {
+        "outlineColor": "rgb(249, 115, 22)",
+        "outlineStyle": "solid",
+        "outlineWidth": "3px",
+    }
+    page.context.close()
+
+
+@pytest.mark.parametrize("width,height", [(390, 844), (430, 932)])
+def test_nav_search_uses_sage_focus_without_hover_on_touch_mobile(
+    browser: Browser,
+    browser_base_url: str,
+    width: int,
+    height: int,
+) -> None:
+    context = browser.new_context(
+        viewport={"width": width, "height": height},
+        has_touch=True,
+        is_mobile=True,
+    )
+    page = context.new_page()
+    page.goto(browser_base_url, wait_until="networkidle")
+
+    assert page.evaluate(
+        "window.matchMedia('(hover: hover) and (pointer: fine)').matches"
+    ) is False
+    page.get_by_role("button", name="Open navigation search").tap()
+    nav_input = page.locator("#nav-search-query")
+    nav_shell = page.locator(".nav-search-shell")
+    expect(nav_input).to_be_focused()
+    page.wait_for_timeout(250)
+    focus_style = nav_shell.evaluate(
+        """element => {
+            const style = getComputedStyle(element);
+            return {
+                borderColor: style.borderColor,
+                boxShadow: style.boxShadow,
+            };
+        }"""
+    )
+    input_style = nav_input.evaluate(
+        """element => {
+            const style = getComputedStyle(element);
+            return {
+                outlineStyle: style.outlineStyle,
+                outlineWidth: style.outlineWidth,
+            };
+        }"""
+    )
+    assert focus_style["borderColor"] == "rgb(82, 100, 66)"
+    assert "rgb(82, 100, 66)" in focus_style["boxShadow"]
+    assert input_style == {"outlineStyle": "none", "outlineWidth": "0px"}
+    assert page.evaluate("document.documentElement.scrollWidth") <= width + 1
+    context.close()
+
+
 def test_suggested_question_sends_and_stays_hidden_with_persisted_conversation(
     browser: Browser,
     browser_base_url: str,
