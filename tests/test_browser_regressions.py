@@ -327,6 +327,179 @@ def test_clear_search_restores_the_full_catalogue(
     page.context.close()
 
 
+def test_nav_search_reuses_main_search_and_scrolls_to_its_results(
+    browser: Browser,
+    browser_base_url: str,
+) -> None:
+    page = open_page(browser, browser_base_url)
+    listing = load_listings()[0]
+    submitted_queries: list[str] = []
+
+    def answer_search(route) -> None:
+        query = route.request.post_data_json["query"]
+        submitted_queries.append(query)
+        route.fulfill(
+            status=200,
+            content_type="application/json",
+            body=json.dumps(
+                {"query": query, "results": [listing.model_dump(mode="json")]}
+            ),
+        )
+
+    page.route("**/api/search", answer_search)
+    page.evaluate("window.scrollTo(0, document.body.scrollHeight)")
+    assert page.evaluate("window.scrollY") > 500
+
+    nav_input = page.get_by_label("Search Maker Swap catalogue")
+    expect(nav_input).to_be_visible()
+    nav_input.fill("  beginner   3D printer  ")
+    nav_input.press("Enter")
+
+    expect(page.locator("#catalogue-search-query")).to_have_value(
+        "beginner 3D printer"
+    )
+    expect(page.locator("#catalogue-heading")).to_have_text("AI search matches")
+    expect(page.locator("#listing-grid > [data-listing-id]")).to_have_count(1)
+    expect(page.locator("#listing-grid > [data-listing-id]")).to_have_attribute(
+        "data-listing-id", listing.id
+    )
+    page.wait_for_function(
+        """() => {
+            const top = document.querySelector('#catalogue-search')
+                .getBoundingClientRect().top;
+            return top >= 90 && top <= 130;
+        }""",
+        timeout=4_000,
+    )
+    assert submitted_queries == ["beginner 3D printer"]
+    page.context.close()
+
+
+def test_nav_search_from_detail_returns_to_the_same_home_search_flow(
+    browser: Browser,
+    browser_base_url: str,
+) -> None:
+    page = open_page(
+        browser,
+        browser_base_url,
+        "/listings/original-prusa-mini-plus",
+    )
+    listing = load_listings()[4]
+    submitted_queries: list[str] = []
+
+    def answer_search(route) -> None:
+        query = route.request.post_data_json["query"]
+        submitted_queries.append(query)
+        route.fulfill(
+            status=200,
+            content_type="application/json",
+            body=json.dumps(
+                {"query": query, "results": [listing.model_dump(mode="json")]}
+            ),
+        )
+
+    page.route("**/api/search", answer_search)
+    page.get_by_label("Search Maker Swap catalogue").fill("soldering station")
+    page.get_by_role("button", name="Search Maker Swap").click()
+
+    expect(page).to_have_url(re.compile(r"/#catalogue-search$"))
+    expect(page.locator("#catalogue-search-query")).to_have_value(
+        "soldering station"
+    )
+    expect(page.locator("#catalogue-heading")).to_have_text("AI search matches")
+    expect(page.locator("#listing-grid > [data-listing-id]")).to_have_count(1)
+    assert submitted_queries == ["soldering station"]
+    page.context.close()
+
+
+@pytest.mark.parametrize("width,height", [(390, 844), (430, 932)])
+def test_nav_search_expands_without_crowding_and_submits_on_mobile(
+    browser: Browser,
+    browser_base_url: str,
+    width: int,
+    height: int,
+) -> None:
+    page = open_page(
+        browser,
+        browser_base_url,
+        viewport={"width": width, "height": height},
+    )
+    listing = load_listings()[0]
+    submitted_queries: list[str] = []
+
+    def answer_search(route) -> None:
+        query = route.request.post_data_json["query"]
+        submitted_queries.append(query)
+        route.fulfill(
+            status=200,
+            content_type="application/json",
+            body=json.dumps(
+                {"query": query, "results": [listing.model_dump(mode="json")]}
+            ),
+        )
+
+    page.route("**/api/search", answer_search)
+    nav = page.locator(".site-glass-nav")
+    brand = page.locator(".site-brand")
+    category_menu = page.locator("#site-category-menu")
+    toggle = page.get_by_role("button", name="Open navigation search")
+    nav_form = page.locator("#nav-search-form")
+
+    expect(brand).to_be_visible()
+    expect(category_menu).to_be_visible()
+    expect(toggle).to_be_visible()
+    expect(nav_form).to_be_hidden()
+    collapsed_boxes = [
+        element.bounding_box() for element in (brand, toggle, category_menu)
+    ]
+    assert all(box is not None for box in collapsed_boxes)
+    for left, right in zip(collapsed_boxes, collapsed_boxes[1:]):
+        assert left is not None and right is not None
+        assert left["x"] + left["width"] <= right["x"] + 1
+    toggle_box = toggle.bounding_box()
+    assert toggle_box is not None
+    assert toggle_box["width"] >= 44
+    assert toggle_box["height"] >= 44
+
+    toggle.click()
+    expect(nav).to_have_class(re.compile(r"\bnav-search-expanded\b"))
+    expect(nav_form).to_be_visible()
+    expect(brand).to_be_hidden()
+    expect(category_menu).to_be_hidden()
+    nav_input = page.get_by_label("Search Maker Swap catalogue")
+    expect(nav_input).to_be_focused()
+    expanded_box = nav_form.bounding_box()
+    assert expanded_box is not None
+    assert expanded_box["x"] >= 0
+    assert expanded_box["x"] + expanded_box["width"] <= width + 1
+
+    nav_input.press("Escape")
+    expect(nav_form).to_be_hidden()
+    expect(toggle).to_be_focused()
+    toggle.click()
+    nav_input.fill("beginner printer")
+    page.get_by_role("button", name="Search Maker Swap").click()
+
+    expect(nav_form).to_be_hidden()
+    expect(brand).to_be_visible()
+    expect(category_menu).to_be_visible()
+    expect(page.locator("#catalogue-search-query")).to_have_value(
+        "beginner printer"
+    )
+    expect(page.locator("#catalogue-heading")).to_have_text("AI search matches")
+    assert submitted_queries == ["beginner printer"]
+    dimensions = page.evaluate(
+        """() => ({
+            viewport: window.innerWidth,
+            document: document.documentElement.scrollWidth,
+            body: document.body.scrollWidth,
+        })"""
+    )
+    assert dimensions["document"] <= dimensions["viewport"] + 1
+    assert dimensions["body"] <= dimensions["viewport"] + 1
+    page.context.close()
+
+
 def test_gallery_preference_survives_category_filtering(
     browser: Browser,
     browser_base_url: str,

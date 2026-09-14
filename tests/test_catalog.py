@@ -104,6 +104,12 @@ def test_browse_page_has_navigation_and_on_page_category_controls() -> None:
 
     assert response.status_code == 200
     assert 'class="site-header fixed' in response.text
+    assert 'id="nav-search-form"' in response.text
+    assert 'id="nav-search-query"' in response.text
+    assert 'name="nav_query"' in response.text
+    assert 'aria-label="Search Maker Swap"' in response.text
+    assert 'aria-label="Open navigation search"' in response.text
+    assert 'aria-label="Close navigation search"' in response.text
     assert 'id="site-category-menu"' in response.text
     assert 'id="category-menu-toggle"' in response.text
     assert "All Listings" in response.text
@@ -120,6 +126,12 @@ def test_browse_page_has_navigation_and_on_page_category_controls() -> None:
     )
     assert response.text.count("?category=Electronics#listings\"") == 2
     assert ">Browse</a>" not in response.text
+    assert 'id="catalogue-search"' in response.text
+    assert 'src="http://testserver/static/nav.js?v=nav-search-1"' in response.text
+    assert (
+        'href="http://testserver/static/styles.css?v=nav-search-1"'
+        in response.text
+    )
 
 
 def test_category_controls_reflect_the_same_active_filter() -> None:

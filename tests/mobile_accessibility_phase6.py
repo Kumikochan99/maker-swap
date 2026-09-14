@@ -111,6 +111,7 @@ def focused_element_state(page: Page) -> dict[str, object]:
 
 
 def verify_keyboard_and_labels(page: Page) -> dict[str, object]:
+    expect(page.get_by_label("Search Maker Swap catalogue")).to_have_count(1)
     search_input = page.get_by_label("Search the catalogue in natural language")
     expect(search_input).to_have_attribute("id", "catalogue-search-query")
     expect(page.get_by_role("button", name="Find matches")).to_be_visible()
@@ -185,6 +186,46 @@ def verify_glass_navigation(page: Page) -> dict[str, object]:
     assert "rgba" in style["background"]
     assert "blur" in style["backdrop"]
 
+    brand = page.locator(".site-brand")
+    search_toggle = page.get_by_role("button", name="Open navigation search")
+    category_menu = page.locator("#site-category-menu")
+    expect(brand).to_be_visible()
+    expect(search_toggle).to_be_visible()
+    expect(category_menu).to_be_visible()
+    collapsed_boxes = [
+        element.bounding_box() for element in (brand, search_toggle, category_menu)
+    ]
+    assert all(box is not None for box in collapsed_boxes)
+    for left, right in zip(collapsed_boxes, collapsed_boxes[1:]):
+        assert left is not None and right is not None
+        assert left["x"] + left["width"] <= right["x"] + 1
+    search_toggle_box = search_toggle.bounding_box()
+    assert search_toggle_box is not None
+    assert search_toggle_box["width"] >= 44
+    assert search_toggle_box["height"] >= 44
+
+    search_toggle.click()
+    expect(nav).to_have_class(re.compile(r"\bnav-search-expanded\b"))
+    nav_search_form = page.locator("#nav-search-form")
+    expect(nav_search_form).to_be_visible()
+    expect(brand).to_be_hidden()
+    expect(category_menu).to_be_hidden()
+    nav_search_input = page.get_by_label("Search Maker Swap catalogue")
+    expect(nav_search_input).to_be_focused()
+    expanded_form_box = nav_search_form.bounding_box()
+    assert expanded_form_box is not None
+    viewport = page.viewport_size
+    assert viewport is not None
+    assert expanded_form_box["x"] >= 0
+    assert expanded_form_box["x"] + expanded_form_box["width"] <= viewport["width"] + 1
+    page.screenshot(
+        path=ARTIFACT_DIR / f"nav-search-expanded-{viewport['width']}.png",
+        full_page=False,
+    )
+    page.get_by_role("button", name="Close navigation search").click()
+    expect(nav_search_form).to_be_hidden()
+    expect(search_toggle).to_be_focused()
+
     toggle = page.locator("#category-menu-toggle")
     toggle.click()
     expect(toggle).to_have_attribute("aria-expanded", "true")
@@ -196,7 +237,14 @@ def verify_glass_navigation(page: Page) -> dict[str, object]:
     expect(panel).to_be_hidden()
     expect(toggle).to_be_focused()
 
-    return {"style": style, "panel": panel_box, "escape_returns_focus": True}
+    return {
+        "style": style,
+        "collapsed_elements": collapsed_boxes,
+        "search_toggle": search_toggle_box,
+        "expanded_search": expanded_form_box,
+        "panel": panel_box,
+        "escape_returns_focus": True,
+    }
 
 
 def verify_viewport(

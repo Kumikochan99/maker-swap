@@ -362,6 +362,8 @@ def test_browse_page_includes_async_search_states() -> None:
 
     assert response.status_code == 200
     assert 'id="catalogue-search-form"' in response.text
+    assert 'id="nav-search-form"' in response.text
+    assert 'id="nav-search-query"' in response.text
     assert 'id="search-status"' in response.text
     assert 'id="catalogue-empty-state"' in response.text
     assert 'id="browse-all-items"' in response.text
