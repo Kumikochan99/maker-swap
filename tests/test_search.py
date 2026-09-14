@@ -367,17 +367,8 @@ def test_browse_page_includes_async_search_states() -> None:
     assert 'id="search-status"' in response.text
     assert 'id="catalogue-empty-state"' in response.text
     assert 'id="browse-all-items"' in response.text
-    assert response.text.count("data-suggested-query=") == 3
-    assert 'data-suggested-query="Beginner setup under $150"' in response.text
-    assert (
-        'data-suggested-query="Portable gear in excellent condition"'
-        in response.text
-    )
-    assert 'data-suggested-query="Tools for electronics repair"' in response.text
-    assert (
-        'src="http://testserver/static/search.js?v=suggested-queries-1"'
-        in response.text
-    )
+    assert "data-suggested-query" not in response.text
+    assert 'src="http://testserver/static/search.js?v=polish-status-1"' in response.text
     assert "data-card-status" in response.text
     assert "data-listing-status" in response.text
     assert "CLASSGW_KEY" not in response.text

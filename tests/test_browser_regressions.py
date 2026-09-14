@@ -375,45 +375,68 @@ def test_nav_search_reuses_main_search_and_scrolls_to_its_results(
     page.context.close()
 
 
-def test_suggested_query_chip_submits_through_existing_search_flow(
+def test_suggested_question_sends_and_stays_hidden_with_persisted_conversation(
     browser: Browser,
     browser_base_url: str,
 ) -> None:
     page = open_page(browser, browser_base_url)
-    listing = load_listings()[4]
-    submitted_queries: list[str] = []
+    submitted_payloads: list[dict] = []
 
-    def answer_search(route) -> None:
-        query = route.request.post_data_json["query"]
-        submitted_queries.append(query)
+    def answer_question(route) -> None:
+        submitted_payloads.append(route.request.post_data_json)
         route.fulfill(
             status=200,
             content_type="application/json",
             body=json.dumps(
-                {"query": query, "results": [listing.model_dump(mode="json")]}
+                {
+                    "answer": "No listing includes warranty information.",
+                    "sources": [],
+                }
             ),
         )
 
-    page.route("**/api/search", answer_search)
+    page.route("**/api/qa", answer_question)
+    page.get_by_role("button", name="Open catalogue chat").click()
+    empty_state = page.locator("#catalogue-chat-empty")
+    suggestions = page.locator("[data-suggested-question]")
+    expect(empty_state).to_be_visible()
+    expect(suggestions).to_have_count(3)
+
     suggestion = page.get_by_role(
-        "button", name="Tools for electronics repair", exact=True
+        "button", name="Does anything include a warranty?", exact=True
     )
     suggestion.click()
 
-    expect(page.locator("#catalogue-search-query")).to_have_value(
-        "Tools for electronics repair"
-    )
-    expect(page.locator("#catalogue-heading")).to_have_text("AI search matches")
-    expect(page.locator("#listing-grid > [data-listing-id]")).to_have_count(1)
-    expect(page.locator("#listing-grid > [data-listing-id]")).to_have_attribute(
-        "data-listing-id", listing.id
-    )
-    assert submitted_queries == ["Tools for electronics repair"]
+    expect(empty_state).to_be_hidden()
+    for index in range(suggestions.count()):
+        expect(suggestions.nth(index)).to_be_hidden()
+    expect(
+        page.locator('.catalogue-chat-message[data-role="user"]')
+    ).to_contain_text("Does anything include a warranty?")
+    expect(
+        page.locator('.catalogue-chat-message[data-role="assistant"]')
+    ).to_contain_text("No listing includes warranty information.")
+    assert submitted_payloads == [
+        {"question": "Does anything include a warranty?", "history": []}
+    ]
+
+    page.locator("#catalogue-chat-close").click()
+    page.locator("#catalogue-chat-toggle").click()
+    expect(empty_state).to_be_hidden()
+    for index in range(suggestions.count()):
+        expect(suggestions.nth(index)).to_be_hidden()
+
+    page.reload(wait_until="networkidle")
+    page.locator("#catalogue-chat-toggle").click()
+    expect(page.locator(".catalogue-chat-message")).to_have_count(2)
+    expect(empty_state).to_be_hidden()
+    for index in range(suggestions.count()):
+        expect(suggestions.nth(index)).to_be_hidden()
     page.context.close()
 
 
 @pytest.mark.parametrize("width,height", [(390, 844), (430, 932)])
-def test_suggested_query_chips_wrap_inside_search_panel_on_mobile(
+def test_suggested_questions_fit_chat_empty_state_on_mobile(
     browser: Browser,
     browser_base_url: str,
     width: int,
@@ -424,11 +447,18 @@ def test_suggested_query_chips_wrap_inside_search_panel_on_mobile(
         browser_base_url,
         viewport={"width": width, "height": height},
     )
-    panel = page.locator(".search-panel")
-    suggestions = page.locator("[data-suggested-query]")
+    page.get_by_role("button", name="Open catalogue chat").click()
+    panel = page.locator("#catalogue-chat-panel")
+    empty_state = page.locator("#catalogue-chat-empty")
+    scroll_region = page.locator(".catalogue-chat-scroll")
+    suggestions = page.locator("[data-suggested-question]")
 
     expect(suggestions).to_have_count(3)
     panel_box = panel.bounding_box()
+    empty_box = empty_state.bounding_box()
+    scroll_metrics = scroll_region.evaluate(
+        "element => ({clientHeight: element.clientHeight, scrollHeight: element.scrollHeight})"
+    )
     suggestion_boxes = suggestions.evaluate_all(
         """elements => elements.map((element) => {
             const rect = element.getBoundingClientRect();
@@ -436,10 +466,11 @@ def test_suggested_query_chips_wrap_inside_search_panel_on_mobile(
         })"""
     )
     assert panel_box is not None
-    assert len({round(box["y"]) for box in suggestion_boxes}) >= 2
+    assert empty_box is not None
+    assert scroll_metrics["scrollHeight"] <= scroll_metrics["clientHeight"] + 1
     for box in suggestion_boxes:
-        assert box["x"] >= panel_box["x"]
-        assert box["x"] + box["width"] <= panel_box["x"] + panel_box["width"] + 1
+        assert box["x"] >= empty_box["x"]
+        assert box["x"] + box["width"] <= empty_box["x"] + empty_box["width"] + 1
         assert box["height"] >= 40
 
     dimensions = page.evaluate(

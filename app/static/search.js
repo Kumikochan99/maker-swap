@@ -8,7 +8,6 @@
   const spinner = submitButton.querySelector("[data-search-spinner]");
   const clearButton = document.querySelector("#catalogue-search-clear");
   const browseAllLink = document.querySelector("#browse-all-items");
-  const suggestedQueryButtons = document.querySelectorAll("[data-suggested-query]");
   const status = document.querySelector("#search-status");
   const grid = document.querySelector("#listing-grid");
   const emptyState = document.querySelector("#catalogue-empty-state");
@@ -199,17 +198,6 @@
 
   clearButton.addEventListener("click", () => {
     returnToFullCatalogue();
-  });
-
-  suggestedQueryButtons.forEach((button) => {
-    button.addEventListener("click", () => {
-      const query = button.dataset.suggestedQuery;
-      if (!query) return;
-      input.value = query;
-      input.dispatchEvent(new Event("input", { bubbles: true }));
-      input.focus({ preventScroll: true });
-      form.requestSubmit();
-    });
   });
 
   browseAllLink.addEventListener("click", (event) => {

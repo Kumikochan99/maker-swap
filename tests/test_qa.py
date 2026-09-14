@@ -365,5 +365,18 @@ def test_floating_chat_widget_is_available_on_every_page(path: str) -> None:
     assert 'id="catalogue-chat-toggle"' in response.text
     assert 'id="catalogue-chat-panel"' in response.text
     assert 'aria-expanded="false"' in response.text
-    assert 'src="http://testserver/static/chat.js?v=phase4-citations-1"' in response.text
+    assert response.text.count("data-suggested-question=") == 3
+    assert 'data-suggested-question="Does anything include a warranty?"' in response.text
+    assert (
+        'data-suggested-question="Which electronics item is best for a beginner?"'
+        in response.text
+    )
+    assert (
+        'data-suggested-question="Compare the Prusa and Bambu printers."'
+        in response.text
+    )
+    assert (
+        'src="http://testserver/static/chat.js?v=suggested-questions-1"'
+        in response.text
+    )
     assert "CLASSGW_KEY" not in response.text

@@ -129,7 +129,7 @@ def test_browse_page_has_navigation_and_on_page_category_controls() -> None:
     assert 'id="catalogue-search"' in response.text
     assert 'src="http://testserver/static/nav.js?v=nav-search-1"' in response.text
     assert (
-        'href="http://testserver/static/styles.css?v=nav-search-1"'
+        'href="http://testserver/static/styles.css?v=suggested-questions-1"'
         in response.text
     )
 

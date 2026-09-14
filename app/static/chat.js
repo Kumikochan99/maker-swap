@@ -12,6 +12,9 @@
   const spinner = submitButton?.querySelector("[data-chat-spinner]");
   const status = document.querySelector("#catalogue-chat-status");
   const emptyState = document.querySelector("#catalogue-chat-empty");
+  const suggestedQuestionButtons = emptyState?.querySelectorAll(
+    "[data-suggested-question]",
+  );
   const messageLog = document.querySelector("#catalogue-chat-messages");
   const scrollRegion = document.querySelector(".catalogue-chat-scroll");
 
@@ -26,6 +29,7 @@
     !spinner ||
     !status ||
     !emptyState ||
+    !suggestedQuestionButtons ||
     !messageLog ||
     !scrollRegion
   ) {
@@ -221,6 +225,16 @@
       event.preventDefault();
       form.requestSubmit();
     }
+  });
+
+  suggestedQuestionButtons.forEach((button) => {
+    button.addEventListener("click", () => {
+      const question = button.dataset.suggestedQuestion;
+      if (!question || activeRequest) return;
+      questionInput.value = question;
+      questionInput.dispatchEvent(new Event("input", { bubbles: true }));
+      form.requestSubmit();
+    });
   });
 
   form.addEventListener("submit", async (event) => {

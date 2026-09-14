@@ -647,7 +647,7 @@ body.simulated-checkout-open {
   .catalogue-chat-panel {
     width: calc(100vw - 1.5rem);
     height: calc(100dvh - 5.5rem);
-    max-height: 32rem;
+    max-height: 38rem;
     border-radius: 1.5rem;
   }
 }

@@ -10,7 +10,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="{{ url_for('static', path='/styles.css') }}?v=nav-search-1">
+    <link rel="stylesheet" href="{{ url_for('static', path='/styles.css') }}?v=suggested-questions-1">
   </head>
   <body class="min-h-screen overflow-x-hidden bg-stone-50 text-slate-950 antialiased">
     <a class="skip-link" href="#main-content">Skip to content</a>
@@ -122,7 +122,15 @@
 
         <div class="catalogue-chat-scroll flex-1 overflow-y-auto px-4 py-4">
           <div id="catalogue-chat-empty" class="rounded-2xl border border-slate-800 bg-slate-900/70 p-4 text-sm leading-6 text-slate-300">
-            Ask about listing facts, compare products, or check what the catalogue does and does not say. Answers use only the 16 seeded listings.
+            <p>Ask about listing facts, compare products, or check what the catalogue does and does not say. Answers use only the 16 seeded listings.</p>
+            <div class="mt-4" role="group" aria-labelledby="suggested-questions-label">
+              <p id="suggested-questions-label" class="text-[0.68rem] font-bold uppercase tracking-[0.14em] text-orange-300">Try a question</p>
+              <div class="mt-2 flex flex-wrap gap-2">
+                <button type="button" class="min-h-10 max-w-full rounded-full border border-slate-600 bg-slate-800 px-3 py-2 text-left text-xs font-semibold leading-5 text-slate-100 transition hover:border-orange-400 hover:bg-slate-700" data-suggested-question="Does anything include a warranty?">Does anything include a warranty?</button>
+                <button type="button" class="min-h-10 max-w-full rounded-full border border-slate-600 bg-slate-800 px-3 py-2 text-left text-xs font-semibold leading-5 text-slate-100 transition hover:border-orange-400 hover:bg-slate-700" data-suggested-question="Which electronics item is best for a beginner?">Which electronics item is best for a beginner?</button>
+                <button type="button" class="min-h-10 max-w-full rounded-full border border-slate-600 bg-slate-800 px-3 py-2 text-left text-xs font-semibold leading-5 text-slate-100 transition hover:border-orange-400 hover:bg-slate-700" data-suggested-question="Compare the Prusa and Bambu printers.">Compare the Prusa and Bambu printers.</button>
+              </div>
+            </div>
           </div>
           <div id="catalogue-chat-messages" class="catalogue-chat-messages" role="log" aria-live="polite" aria-relevant="additions text"></div>
         </div>
@@ -165,7 +173,7 @@
       </button>
     </div>
     <script src="{{ url_for('static', path='/nav.js') }}?v=nav-search-1" defer></script>
-    <script src="{{ url_for('static', path='/chat.js') }}?v=phase4-citations-1" defer></script>
+    <script src="{{ url_for('static', path='/chat.js') }}?v=suggested-questions-1" defer></script>
     {% block scripts %}{% endblock %}
   </body>
 </html>
