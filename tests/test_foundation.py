@@ -52,7 +52,10 @@ def test_notes_page_is_real_and_truthful() -> None:
     assert "Available Raspberry Pi 4 Workbench Set at S$95" in response.text
     assert "great choice for beginners and user-friendly" in response.text
     assert "390 px and 430 px widths" in response.text
-    assert "I did not test this build on a physical phone" in response.text
+    assert "tested the site multiple times throughout the build" in response.text
+    assert "my own physical phone using Chrome" in response.text
+    assert "not exhaustive testing" in response.text
+    assert "I did not test this build on a physical phone" not in response.text
     assert "The bare <code>cg_</code> prefix" in response.text
     assert "plan.md" in response.text
     assert "decisions.md" in response.text
