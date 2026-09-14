@@ -134,7 +134,9 @@ def run_reviewer_flow(page: Page) -> dict[str, object]:
     expect(page.get_by_text("Build notes / Current demo", exact=True)).to_be_visible()
     expect(page.locator("main section[id]")).to_have_count(5)
     expect(page.get_by_text("gpt-5.6-sol max", exact=True)).to_be_visible()
-    expect(page.get_by_text("Budget language is approximate.", exact=True)).to_be_visible()
+    expect(
+        page.get_by_text("Price and budget words are not hard filters.", exact=True)
+    ).to_be_visible()
 
     page.locator("#catalogue-chat-toggle").click()
     expect(page.locator(".catalogue-chat-message")).to_have_count(4)

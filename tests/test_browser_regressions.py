@@ -1238,6 +1238,54 @@ def test_glass_navigation_remains_legible_across_page_backgrounds(
     page.context.close()
 
 
+@pytest.mark.parametrize("width,height", [(390, 844), (430, 932)])
+def test_plain_language_notes_and_audit_limits_fit_mobile_viewports(
+    browser: Browser,
+    browser_base_url: str,
+    width: int,
+    height: int,
+) -> None:
+    page = open_page(
+        browser,
+        browser_base_url,
+        "/notes",
+        {"width": width, "height": height},
+    )
+
+    expect(
+        page.get_by_role(
+            "heading", name="What I built and what is still limited."
+        )
+    ).to_be_visible()
+    known_issues = page.locator("#known-issues")
+    known_issues.scroll_into_view_if_needed()
+    expect(
+        known_issues.get_by_text(
+            "Price and budget words are not hard filters.", exact=True
+        )
+    ).to_be_visible()
+    expect(
+        known_issues.get_by_text(
+            "Q&A can omit an item from a list.", exact=True
+        )
+    ).to_be_visible()
+
+    dimensions = page.evaluate(
+        """() => ({
+            viewport: window.innerWidth,
+            document: document.documentElement.scrollWidth,
+            body: document.body.scrollWidth,
+        })"""
+    )
+    assert dimensions["document"] <= dimensions["viewport"] + 1
+    assert dimensions["body"] <= dimensions["viewport"] + 1
+    issues_box = known_issues.bounding_box()
+    assert issues_box is not None
+    assert issues_box["x"] >= 0
+    assert issues_box["x"] + issues_box["width"] <= width + 1
+    page.context.close()
+
+
 def test_simulated_checkout_confirms_without_network_or_catalogue_mutation(
     browser: Browser,
     browser_base_url: str,
